@@ -584,6 +584,47 @@ test("extractFailingPaths ignores the step command echo and reads the failure li
   assert.deepEqual(measure.extractFailingPaths?.(log), ["accrue_admin/assets/css/app.css"]);
 });
 
+test("extractFailingPaths ignores SQL status values and npm command echoes near an unrelated lane failure", () => {
+  const log = [
+    "SELECT count(a0.\"id\") FROM \"billing\".\"accrue_webhook_events\" AS a0 WHERE (a0.\"status\" IN ('failed','dead')) []",
+    "> e2e:group-contracts",
+    "> env -u NO_COLOR playwright test e2e/admin-group-contracts.spec.js --timeout=60000 --workers=1",
+    "16 tests, 0 failures",
+    "FAIL manifest-contract 2915ms",
+  ].join("\n");
+  assert.deepEqual(measure.extractFailingPaths?.(log), []);
+  assert.equal(measure.firstErrorLine?.(log), "FAIL manifest-contract 2915ms");
+});
+
+test("laneFailurePathsFromArtifacts binds a failed lane to the input file it actually executed", () => {
+  const dir = fs.mkdtempSync(path.join(fs.realpathSync(os.tmpdir()), "phase254-lane-failure-"));
+  try {
+    const resultDir = path.join(dir, "phase252-machine-evidence", "ci-results", "fixture");
+    fs.mkdirSync(resultDir, { recursive: true });
+    fs.writeFileSync(path.join(resultDir, "results.json"), JSON.stringify({
+      commands: [
+        {
+          id: "manifest-contract",
+          cwd: "accrue_admin",
+          command: ["mix run --no-start", "run", "--no-start", "test/accrue_admin/dev/subscription_manifest_test.exs"],
+          sources: [
+            "accrue_admin/test/accrue_admin/dev/subscription_manifest_test.exs",
+            "accrue_admin/test/accrue_admin/dev/storybook_coverage_test.exs",
+          ],
+          exitCode: 2,
+        },
+        { id: "green-lane", sources: ["accrue_admin/lib/accrue_admin/live/subscriptions_live.ex"], exitCode: 0 },
+      ],
+    }));
+    assert.deepEqual(measure.laneFailurePathsFromArtifacts?.(dir), [{
+      command_id: "manifest-contract",
+      paths: ["accrue_admin/test/accrue_admin/dev/subscription_manifest_test.exs"],
+    }]);
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 test("extractFailingPaths prefers the numbered failure block over earlier noise", () => {
   const log = [
     "16:38:58.479 [error] Postgrex.Protocol failed to connect at test/fixtures/apple/server_evidence.exs:5",
@@ -626,6 +667,38 @@ test("triageRuns emits one entry per failing path and classification within a st
   assert.match(inScope?.test_ref ?? "", /composition one/);
   assert.equal(out?.path, "e2e/unowned.spec.js");
   assert.equal(out?.test_count, 1);
+});
+
+test("triageRuns uses failed lane artifacts to correct an unrelated path picked from the step log", () => {
+  const log = [
+    "SELECT count(a0.\"id\") FROM \"billing\".\"accrue_webhook_events\" WHERE status IN ('failed','dead')",
+    "> env -u NO_COLOR playwright test e2e/admin-group-contracts.spec.js --workers=1",
+    "FAIL manifest-contract 2915ms",
+  ].join("\n");
+  const run = {
+    workflow_file: "ci.yml",
+    workflow: "CI",
+    run_id: 5,
+    jobs: [{
+      ...jobFixture("Admin Phase 200 deterministic guardrails", [{ name: "Run Phase 200 deterministic guardrails", conclusion: "failure" }]),
+      failed_logs: { "Run Phase 200 deterministic guardrails": log },
+      failed_sources_by_step: {
+        "Run Phase 200 deterministic guardrails": [{
+          command_id: "manifest-contract",
+          paths: ["accrue_admin/test/accrue_admin/dev/subscription_manifest_test.exs"],
+        }],
+      },
+    }],
+  };
+  const entries = measure.triageRuns?.({
+    runs: [run],
+    mainRuns: { "ci.yml": { run_id: 4, failures: [] } },
+    owned: new Set(["accrue_admin/test/accrue_admin/dev/subscription_manifest_test.exs"]),
+  }) ?? [];
+  assert.equal(entries.length, 1);
+  assert.equal(entries[0].classification, "in-scope");
+  assert.equal(entries[0].path, "accrue_admin/test/accrue_admin/dev/subscription_manifest_test.exs");
+  assert.equal(entries[0].test_ref, "Phase 252/253 lane manifest-contract");
 });
 
 test("parseCacheOutcomes reads the real runner log shape (##[group] header, tab-separated, BOM)", () => {

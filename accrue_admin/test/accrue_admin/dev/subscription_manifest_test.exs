@@ -50,6 +50,8 @@ defmodule AccrueAdmin.Test.Phase252SubscriptionManifestTapFormatter do
     do: inspect(failure, limit: 10, printable_limit: 400, pretty: false)
 end
 
+{:ok, _started_apps} = Application.ensure_all_started(:telemetry)
+
 ExUnit.start(formatters: [AccrueAdmin.Test.Phase252SubscriptionManifestTapFormatter])
 
 repo_root = Path.expand("../../../../", __DIR__)

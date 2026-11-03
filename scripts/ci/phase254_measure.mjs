@@ -819,6 +819,39 @@ function readLaneDurations(artifactDir, laneArtifacts) {
   return lanes;
 }
 
+// Failed serial Phase 252/253 lanes can be more precise than the outer owner-job log:
+// the latter contains output from earlier successful tests, including SQL values such as
+// `status IN ('failed','dead')`. Bind the failure to the file the lane actually executed.
+export function laneFailurePathsFromArtifacts(artifactDir) {
+  if (!artifactDir || !fs.existsSync(artifactDir)) return [];
+  const failures = [];
+  for (const artifact of ["phase252-machine-evidence", "phase253-machine-evidence"]) {
+    for (const file of findResultFiles(path.join(artifactDir, artifact))) {
+      let bundle;
+      try {
+        bundle = JSON.parse(fs.readFileSync(file, "utf8"));
+      } catch (error) {
+        fail(`lane result bundle is unreadable: ${path.relative(artifactDir, file)} (${error.message})`);
+      }
+      for (const command of bundle.commands ?? []) {
+        if (!Number.isInteger(command.exitCode) || command.exitCode === 0) continue;
+        const sources = [...new Set((command.sources ?? []).filter((source) => typeof source === "string"))];
+        const sourceSet = new Set(sources);
+        const cwd = typeof command.cwd === "string" ? command.cwd.replace(/\\/g, "/") : "";
+        const executedInputs = (command.command ?? [])
+          .filter((argument) => typeof argument === "string" && /\.(?:mjs|cjs|js|jsx|ts|tsx|exs?|heex|eex|css|json|ya?ml|sh|md|toml)\b/.test(argument))
+          .map((argument) => path.posix.normalize(path.posix.join(cwd, argument.replace(/\\/g, "/"))))
+          .filter((candidate) => sourceSet.has(candidate));
+        failures.push({
+          command_id: typeof command.id === "string" ? command.id : "unknown-lane",
+          paths: executedInputs.length > 0 ? [...new Set(executedInputs)] : sources,
+        });
+      }
+    }
+  }
+  return failures.sort((left, right) => left.command_id.localeCompare(right.command_id));
+}
+
 // Playwright browser lanes keep their per-test durations and the report's stats.duration in the
 // results bundle (Phase 254, CIQ-04), so a budget freeze can compute per-cell cost from CI evidence.
 // A reconcile step is not a cell and is excluded from the cell count.
@@ -1006,10 +1039,11 @@ const RUNNER_PREFIX = /^\/(?:home\/runner\/work|Users\/runner\/work)\/[^/]+\/[^/
 // survive a copy that dropped the ESC byte, so both forms are removed.
 const ANSI = /(?:\u001b)?\[[0-9;]*m/g;
 const stripAnsi = (line) => line.replace(ANSI, "");
+const SQL_DIAGNOSTIC = /^\s*(?:SELECT|INSERT|UPDATE|DELETE)\b/i;
 
 // The step's own command echo (`##[group]Run <cmd>`, the ANSI-coloured copy, `shell:`/`env:`)
 // names the scripts the step RUNS, not the paths that FAILED, so it is never evidence.
-const COMMAND_ECHO = /^(?:##\[group\]Run\b|(?:\u001b|\^\[)\[36;1m|shell:\s|env:\s*$|\s{2}[A-Z][A-Z0-9_]*:\s)/;
+const COMMAND_ECHO = /^(?:##\[group\]Run\b|(?:\u001b|\^\[)\[36;1m|shell:\s|env:\s*$|\s{2}[A-Z][A-Z0-9_]*:\s|>\s*(?:env|node|mix|npm|npx|playwright)\b|>\s*[\w:-]+\s*$)/;
 // Primary failure markers and how many following lines belong to the same failure block.
 const PRIMARY_MARKERS = [
   [/^\s*\d+\)\s/, 60],
@@ -1048,7 +1082,7 @@ function pathsInWindows(lines, markers) {
 // primary block exists. Dependency trees, node internals and absolute paths outside the
 // checkout are not evidence of a failing path and are dropped.
 export function extractFailingPaths(logText) {
-  const lines = String(logText ?? "").split(/\r?\n/).filter((line) => !COMMAND_ECHO.test(line)).map(stripAnsi);
+  const lines = String(logText ?? "").split(/\r?\n/).filter((line) => !COMMAND_ECHO.test(line) && !SQL_DIAGNOSTIC.test(line)).map(stripAnsi);
   const primary = pathsInWindows(lines, PRIMARY_MARKERS);
   if (primary.length > 0) return primary;
   return pathsInWindows(lines, [[WIDE_MARKER, WIDE_WINDOW]]);
@@ -1071,7 +1105,7 @@ const SUMMARY_COUNTER = /^#\s*(?:tests|suites|pass|fail|cancelled|skipped|todo|d
 
 export function firstErrorLine(logText) {
   for (const raw of String(logText ?? "").split(/\r?\n/)) {
-    if (COMMAND_ECHO.test(raw)) continue;
+    if (COMMAND_ECHO.test(raw) || SQL_DIAGNOSTIC.test(raw)) continue;
     const line = raw.replace(TIMESTAMP_PREFIX, "").trim();
     if (line === "" || SUMMARY_COUNTER.test(line)) continue;
     if (/(##\[error\]|\bError\b|\bFAIL\b|\bfailed\b|not ok|✖|\*\* \()/.test(line)) return line.slice(0, 300);
@@ -1140,6 +1174,30 @@ export function triageRuns({ runs, mainRuns, owned }) {
       for (const stepName of stepNames) {
         const log = stepName === null ? "" : (job.failed_logs?.[stepName] ?? "");
         const grouped = new Map();
+        const laneEvidence = job.failed_sources_by_step?.[stepName] ?? [];
+        if (laneEvidence.length > 0) {
+          for (const evidence of laneEvidence) {
+            const paths = Array.isArray(evidence.paths) ? evidence.paths : [];
+            const verdict = classifyRed({ workflow_file: run.workflow_file, job: job.name, step: stepName, paths, log: "" }, { owned, mainFailures });
+            const key = `${verdict.classification}|${verdict.path}`;
+            const seen = grouped.get(key);
+            if (seen) { seen.test_count += 1; continue; }
+            grouped.set(key, {
+              workflow: run.workflow,
+              run_id: run.run_id,
+              job: job.name,
+              step: stepName,
+              test_ref: `Phase 252/253 lane ${evidence.command_id}`,
+              path: verdict.path,
+              classification: verdict.classification,
+              main_run_id: main.run_id,
+              first_error_line: null,
+              test_count: 1,
+            });
+          }
+          entries.push(...grouped.values());
+          continue;
+        }
         for (const block of splitFailureBlocks(log)) {
           const verdict = classifyRed({ workflow_file: run.workflow_file, job: job.name, step: stepName, log: block.text }, { owned, mainFailures });
           const key = `${verdict.classification}|${verdict.path}`;
@@ -1185,7 +1243,7 @@ function parseLogByStep(logText) {
   return Object.fromEntries(Object.entries(byStep).map(([step, lines]) => [step, lines.join("\n")]));
 }
 
-function loadRunForTriage({ run, repo }) {
+function loadRunForTriage({ run, repo, artifacts }) {
   const runJson = JSON.parse(gh(["run", "view", String(run), "--repo", repo, "--json", "jobs,headSha,event,attempt,workflowName,workflowDatabaseId,databaseId,conclusion"]));
   const workflowPath = JSON.parse(gh(["api", `repos/${repo}/actions/runs/${run}`, "--jq", "{path: .path}"])).path;
   const jobs = runJson.jobs.map((job) => {
@@ -1195,20 +1253,26 @@ function loadRunForTriage({ run, repo }) {
       const result = spawnSync("gh", ["run", "view", String(run), "--repo", repo, "--job", String(job.databaseId), "--log-failed"], { encoding: "utf8", shell: false, maxBuffer: 128 * 1024 * 1024, timeout: 300_000 });
       failed_logs = result.status === 0 ? parseLogByStep(result.stdout) : {};
     }
-    return { name: job.name, conclusion: job.conclusion, steps: (job.steps ?? []).map((step) => ({ name: step.name, conclusion: step.conclusion })), failed_logs };
+    const laneFailures = job.name === "Admin Phase 200 deterministic guardrails"
+      ? laneFailurePathsFromArtifacts(artifacts)
+      : [];
+    const failed_sources_by_step = laneFailures.length > 0
+      ? { "Run Phase 200 deterministic guardrails": laneFailures }
+      : {};
+    return { name: job.name, conclusion: job.conclusion, steps: (job.steps ?? []).map((step) => ({ name: step.name, conclusion: step.conclusion })), failed_logs, failed_sources_by_step };
   });
   return { workflow_file: path.basename(workflowPath), workflow: runJson.workflowName, run_id: runJson.databaseId, attempt: runJson.attempt, jobs };
 }
 
-export function triageCollect({ run, repo, mainRuns, owned }) {
+export function triageCollect({ run, repo, mainRuns, owned, artifacts = path.join(ROOT, "accrue_admin/tmp/phase254/ci-artifacts", String(run)) }) {
   if (!/^\d+$/.test(String(run))) fail("--run must be a numeric workflow run id");
   if (!/^[\w.-]+\/[\w.-]+$/.test(repo)) fail("--repo must be owner/name");
-  const target = loadRunForTriage({ run, repo });
+  const target = loadRunForTriage({ run, repo, artifacts });
   const mains = {};
   if (target.jobs.some((job) => RED_JOB_CONCLUSIONS.has(job.conclusion))) {
     const runId = mainRuns[target.workflow_file];
     if (runId === undefined) fail(`no --main-run for workflow ${target.workflow_file}; pass --main-run ${target.workflow_file}=<run_id>`);
-    const main = loadRunForTriage({ run: runId, repo });
+    const main = loadRunForTriage({ run: runId, repo, artifacts: null });
     mains[target.workflow_file] = {
       run_id: main.run_id,
       failures: main.jobs.flatMap((job) => job.steps.filter((step) => RED_STEP_CONCLUSIONS.has(step.conclusion)).map((step) => ({ job: job.name, step: step.name }))),
@@ -1366,7 +1430,13 @@ const verbs = {
   async triage({ values }) {
     if (!values.run) fail("triage requires --run <run_id>");
     const mainRuns = parseMainRunOptions(values["main-run"]);
-    const entries = triageCollect({ run: values.run, repo: values.repo ?? "szTheory/accrue", mainRuns, owned: ownedPaths() });
+    const entries = triageCollect({
+      run: values.run,
+      repo: values.repo ?? "szTheory/accrue",
+      mainRuns,
+      owned: ownedPaths(),
+      artifacts: values.artifacts ? path.resolve(values.artifacts) : path.join(ROOT, "accrue_admin/tmp/phase254/ci-artifacts", String(values.run)),
+    });
     const out = values.out ? path.resolve(values.out) : path.join(ROOT, MEASUREMENTS_DIR, `triage-${values.run}.json`);
     writeJson(out, entries);
     const counts = Object.fromEntries(RED_CLASSES.map((name) => [name, entries.filter((entry) => entry.classification === name).length]));

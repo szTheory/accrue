@@ -4,12 +4,12 @@ milestone: v1.68
 milestone_name: UI Storybook Stress Testing
 current_phase: 254
 current_phase_name: Recurring Quality, Reviewed Fixes and Curation
-status: Plan 18 of 18 — executing final acceptance until the blocking-human checkpoint
-stopped_at: Completed Phase 254 Plan 17; continue Plan 18 through the named owner checkpoint
-last_updated: "2026-11-03T19:47:48Z"
+status: Plan 18 of 18 — local gates passed; preparing the final first-attempt CI and Browser UAT observation
+stopped_at: Plan 18 local fixed-point, Phase 252/253 aggregates and archive invariants passed; final push and attempt-1 CI/Browser UAT remain
+last_updated: "2026-11-03T20:39:55Z"
 last_activity: 2026-11-03
-last_activity_desc: Plan 17 completed with required-owner quality records and native transparency proof
-state_head: fd96f861edcfe9410f198f35b34f855ba80f8235
+last_activity_desc: Plan 18 fixed the reporter triage false path, repaired the telemetry test harness, and passed the local fixed-point and aggregate gates
+state_head: 5d857ebe3714674563b822000cc041a6a13c26a0
 progress:
   total_phases: 3
   completed_phases: 2
@@ -34,8 +34,8 @@ See: .planning/PROJECT.md (updated 2026-10-27)
 
 Phase: 254 (Recurring Quality, Reviewed Fixes and Curation) — EXECUTING
 Plan: 18 of 18
-Status: Plan 18 of 18 — executing final acceptance until the blocking-human checkpoint
-Last activity: 2026-11-03 — Plan 17 completed with required-owner quality records and native transparency proof
+Status: Plan 18 of 18 — local gates passed; preparing the final first-attempt CI and Browser UAT observation
+Last activity: 2026-11-03 — Plan 18 local fixed-point, Phase 252/253 aggregates and archive invariants passed
 
 Progress: [███████░░░] 67%
 Current milestone planning blockers: None. Phase 253 passed independent verification (56/56, behavior_unverified: 0), the fresh 10-lane aggregate (151 browser cells/152 tests), retained Phase252 gate (21/21), and executable UAT (24/24). CR-01/CR-02 and the guide-regeneration integration defect are fixed. Six current/historical unclassified assumptions, two nonblocking Phase253 summary reference-parser notices, source-only UI recommendations, and the explicit unavailable monetary-source limit remain recorded for Phase254.
@@ -711,8 +711,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-11-03T19:47:48Z
-Stopped at: Completed Phase 254 Plan 17; proceeding through Plan 18 until its blocking-human checkpoint
+Last session: 2026-11-03T20:39:55Z
+Stopped at: Plan 18 local gates passed; preparing the approved final attempt-1 push and CI/Browser UAT observation
 Resume file: .planning/phases/254-recurring-quality-reviewed-fixes-and-curation/.continue-here.md
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):

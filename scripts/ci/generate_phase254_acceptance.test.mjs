@@ -1,0 +1,248 @@
+import assert from "node:assert/strict";
+import crypto from "node:crypto";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
+import test from "node:test";
+import { fileURLToPath } from "node:url";
+import * as generator from "./generate_phase254_acceptance.mjs";
+import { renderAutomatedUat } from "./verify_executable_uat_contract.mjs";
+
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
+const phaseDir = path.join(root, ".planning", "phases", generator.PHASE_SLUG);
+const readJson = (relative) => JSON.parse(fs.readFileSync(path.join(root, relative), "utf8"));
+const sha = (relative) => requireHash(fs.readFileSync(path.join(root, relative)));
+function requireHash(bytes) {
+  return createHash(bytes);
+}
+function createHash(bytes) {
+  return crypto.createHash("sha256").update(bytes).digest("hex");
+}
+function fixtureEvidence() {
+  const metadata = generator.inspectPhase254Metadata({ root });
+  const ledger = readJson("accrue_admin/storybook/subscription-curation.json");
+  const visualCases = readJson("accrue_admin/storybook/phase254-visual-cases.json");
+  const visualManifest = readJson("accrue_admin/e2e/__screenshots__/visual-desktop/manifest.json");
+  const manifestEntries = visualManifest.entries ?? visualManifest;
+  const designReview = readJson(`.planning/phases/${generator.PHASE_SLUG}/254-DESIGN-REVIEW.json`);
+  const digestRows = (assets) => assets.map(({ path: assetPath, sha256: expected_sha256, key }) => ({ key, path: assetPath, expected_sha256, actual_sha256: expected_sha256 }));
+  const sourceAssets = Object.entries(designReview.assets).flatMap(([key, value]) => value.path ? [{ key, path: value.path, sha256: value.sha256 }] : []);
+  const visualAssets = Object.entries(manifestEntries).map(([key, value]) => ({ key, expected_sha256: value.sha256, actual_sha256: value.sha256 }));
+  const curationSources = Object.entries(ledger.source_digests ?? {}).map(([sourcePath, expected_sha256]) => ({ path: sourcePath, expected_sha256, actual_sha256: expected_sha256 }));
+  const amendments = [
+    ...(ledger.amendments ?? []).map((row) => ({ ...row, source: "accrue_admin/storybook/subscription-curation.json" })),
+    ...(visualCases.amendments ?? []).map((row) => ({ ...row, source: "accrue_admin/storybook/phase254-visual-cases.json" })),
+    ...(designReview.amendments ?? []).map((row) => ({ ...row, source: `.planning/phases/${generator.PHASE_SLUG}/254-DESIGN-REVIEW.json` })),
+  ];
+  const taskEvidence = Object.fromEntries(metadata.tasks.map((task) => {
+    let refs = [`${task.id} executed test identity passes`];
+    if (task.id === "254-05-01") refs = ["live isolation test: 403 in review lane, test lane 200"];
+    if (task.id === "254-05-02") refs = ["interleaved race control, reconciliation and dependent project identity pass"];
+    if (task.id === "254-02-03") refs = ["pure-story classifier and ownership contract pass"];
+    return [task.id, {
+      plan: task.plan,
+      requirements: [...task.requirements],
+      evidence_refs: refs,
+      status: "pass",
+      skipped: 0,
+      retries: 0,
+      automated_command: task.automated ?? "Acceptance contract test",
+      threat_refs: [...task.threat_refs],
+    }];
+  }));
+  const head = "a".repeat(40);
+  const budget = {
+    manifest_sha256: sha("storybook/phase252-manifest.json"),
+    metrics: {
+      final: { head_sha: head, runs: [] },
+      visual: { run_id: 11, added_s: 0, per_cell: { p90_ms: 1 } },
+      a11y: { run_id: 12, added_s: 0, per_cell: { p90_ms: 1 } },
+    },
+    deviations: [
+      { id: "DEV-254-05", kind: "ciq02-fanout-enabled", status: "resolved" },
+      { id: "DEV-254-50", kind: "a11y-cell-budget-freeze", status: "accepted" },
+    ],
+    known_reds: [],
+  };
+  const summaries = [{ status: "complete", coverage: [{ human_judgment: false, verification: [{ status: "pass" }] }] }];
+  const mintRunIds = [...new Set(Object.values(manifestEntries).filter((entry) => entry.provenance !== "phase211-committed" && entry.mint_run_id != null).map((entry) => String(entry.mint_run_id)))].sort();
+  return {
+    metadata,
+    summaries,
+    tasks: taskEvidence,
+    edge_evidence: Object.fromEntries(generator.EDGE_IDS.map((id) => {
+      const binding = generator.EDGE_BINDINGS[id];
+      return [id, {
+        status: "pass",
+        task_id: binding.task_id,
+        summary_name: `${binding.task_id.slice(0, 6)}-SUMMARY.md`,
+        source_path: binding.source_path,
+        source_sha256: sha(binding.source_path),
+        test_identities: [...binding.test_identities],
+        source_assertions: [...(binding.source_assertions ?? [])],
+        refs: [`executed evidence: ${binding.execution_ref}`],
+      }];
+    })),
+    prohibitions: metadata.prohibition_statements.map((statement) => ({ statement, status: "green", fail_first: true })),
+    amendments,
+    manifest: { keys: Object.keys(manifestEntries), mint_run_ids: mintRunIds, entries: manifestEntries },
+    visual_cases: visualCases,
+    design_review: designReview,
+    ledger,
+    identities: {
+      source_assets: digestRows(sourceAssets),
+      visual_assets: visualAssets,
+      curation_sources: curationSources,
+      current_manifest_sha256: budget.manifest_sha256,
+      budget_manifest_sha256: budget.manifest_sha256,
+      measured_head: head,
+      git_head: head,
+      measured_head_is_ancestor: true,
+      source_drift_after_measurement: [],
+    },
+    budget,
+    checkpoints: {
+      "254-03-01": "push-approved",
+      "254-03-03": "fix-in-phase; accept-known-red for KR-254-06",
+      "254-15-02": "fix-in-phase; accept-attributable",
+      "254-18-02": "not required",
+    },
+    escalation_count: 0,
+    final_runs: [
+      { job: "admin-phase200-guardrails", run_id: 11, head_sha: head, attempt: 1, conclusion: "success", phase_owned_ok: true },
+      { job: "browser-uat", run_id: 12, head_sha: head, attempt: 1, conclusion: "success", phase_owned_ok: true },
+    ],
+  };
+}
+function rejects(mutator, pattern) {
+  const evidence = structuredClone(fixtureEvidence());
+  mutator(evidence);
+  assert.throws(() => generator.validatePhase254Evidence(evidence), pattern);
+}
+
+test("metadata is parsed from all eighteen plans and binds seven requirements and every task", () => {
+  const metadata = generator.inspectPhase254Metadata({ root });
+  assert.equal(metadata.plans.length, 18);
+  assert.deepEqual(metadata.requirements, [...generator.REQUIREMENT_IDS].sort());
+  assert.ok(metadata.tasks.some(({ id }) => id === "254-18-03"));
+  assert.deepEqual(metadata.unclassified, [...generator.UNRESOLVED_ASSUMPTION_IDS]);
+});
+
+test("a complete evidence fixture validates all requirements, tasks, edges, amendments and current identities", () => {
+  assert.equal(generator.validatePhase254Evidence(fixtureEvidence()).status, "passed");
+});
+
+test("every explicit edge is bound to its named test identities, source file and executed summary ref", () => {
+  for (const id of generator.EDGE_IDS) {
+    const binding = generator.EDGE_BINDINGS[id];
+    const source = fs.readFileSync(path.join(root, binding.source_path), "utf8");
+    assert.ok(binding.test_identities.every((identity) => source.includes(identity)), `${id} source identity`);
+    assert.ok(binding.task_id, `${id} task identity`);
+  }
+  rejects((e) => { e.edge_evidence[generator.EDGE_IDS[0]].test_identities = []; }, /test identities mismatch/);
+  rejects((e) => { e.edge_evidence[generator.EDGE_IDS[1]].source_sha256 = "stale"; }, /source identity is stale/);
+  rejects((e) => { e.edge_evidence[generator.EDGE_IDS[2]].refs = ["unrelated test run"]; }, /bound test run/);
+});
+
+test("a missing requirement is rejected", () => rejects((e) => e.metadata.requirements.pop(), /requirement IDs mismatch/));
+test("a task without executed evidence is rejected", () => rejects((e) => { delete e.tasks["254-14-02"]; }, /task evidence IDs mismatch/));
+test("skipped or retried test evidence is rejected", () => {
+  rejects((e) => { e.tasks["254-14-02"].skipped = 1; }, /skipped tests/);
+  rejects((e) => { e.tasks["254-14-02"].retries = 1; }, /retried tests/);
+});
+test("stale source, asset, manifest and run identities are rejected", () => {
+  rejects((e) => { e.identities.source_assets[0].actual_sha256 = "0".repeat(64); }, /source asset is stale/);
+  rejects((e) => { e.identities.visual_assets[0].actual_sha256 = "0".repeat(64); }, /visual baseline asset is stale/);
+  rejects((e) => { e.identities.current_manifest_sha256 = "0".repeat(64); }, /budget manifest digest is stale/);
+  rejects((e) => { e.final_runs[0].head_sha = "b".repeat(40); }, /different source head/);
+  rejects((e) => { e.identities.source_drift_after_measurement = ["accrue_admin/lib/source.ex"]; }, /source files changed after its observed head/);
+});
+test("final owner jobs require green phase-owned attempt-1 runs and all deviations must close", () => {
+  rejects((e) => { e.final_runs = e.final_runs.filter((run) => run.job !== "admin-phase200-guardrails"); }, /admin-phase200-guardrails has no successful attempt-1 phase-owned run/);
+  rejects((e) => { e.final_runs[1].phase_owned_ok = false; }, /browser-uat has no successful attempt-1 phase-owned run/);
+  rejects((e) => { e.budget.deviations[0].status = "open"; }, /open budget deviation remains/);
+});
+test("unmatched final reds and owner-job reds are rejected", () => {
+  rejects((e) => {
+    e.final_runs.push({ job: "Docs and bash contracts (shift-left)", run_id: 13, head_sha: "a".repeat(40), attempt: 1, conclusion: "failure", phase_owned_ok: false });
+  }, /red run 13 has no triage disposition/);
+  rejects((e) => {
+    e.final_runs.push({ job: "Docs and bash contracts (shift-left)", run_id: 13, head_sha: "a".repeat(40), attempt: 1, conclusion: "failure", phase_owned_ok: false });
+    e.budget.deviations.push({ id: "DEV-254-51", kind: "final-triage", status: "accepted", entries: [{ job: "Docs and bash contracts (shift-left)", step: "SL-G", run_id: 13, classification: "environmental" }] });
+  }, /unmatched environmental red requires the 254-18-02 owner decision/);
+  rejects((e) => {
+    e.budget.deviations.push({ id: "DEV-254-51", kind: "final-triage", status: "accepted", entries: [{ job: "admin-phase200-guardrails", step: "owner step", run_id: 11, classification: "in-scope", fixed_in_sha: "b".repeat(40), followup_run_id: 14, owner_job_out_of_scope: true }] });
+  }, /out-of-scope red remains inside a required owner job/);
+});
+test("unclassified assumptions cannot be relabelled resolved", () => rejects((e) => { e.metadata.unresolved_assumptions[0].status = "resolved"; }, /must remain unresolved/));
+test("each promoted prohibition needs its native fail-first proof", () => rejects((e) => { e.prohibitions[1].fail_first = false; }, /native green and fail-first proof/));
+test("every unconditional amendment is required", () => {
+  for (const id of generator.AMENDMENT_IDS) rejects((e) => { e.amendments = e.amendments.filter((row) => row.id !== id); }, /unconditional and conditional amendments/);
+});
+test("amendments require the plan-time owner acknowledgment", () => rejects((e) => { e.amendments.find((row) => row.id === "AMD-254-04").owner_ack = undefined; }, /plan-time owner acknowledgment/));
+test("AMD-254-06 is required for multiple mint identities and must name the exact runs", () => {
+  rejects((e) => { e.manifest.mint_run_ids = ["run-a", "run-b"]; e.amendments = e.amendments.filter((row) => row.id !== "AMD-254-06"); }, /AMD-254-06 is required/);
+  rejects((e) => { e.manifest.mint_run_ids = ["run-a", "run-b"]; e.amendments.find((row) => row.id === "AMD-254-06").amended = ["run-a"]; }, /mint run identities mismatch/);
+});
+test("CIQ-02 needs the isolation identities, pure-story classifier and fan-out decision", () => {
+  rejects((e) => { e.tasks["254-05-01"].evidence_refs = ["review lane works"]; }, /CIQ-02 isolation evidence/);
+  rejects((e) => { e.budget.deviations = e.budget.deviations.filter((row) => row.kind !== "ciq02-fanout-enabled"); }, /CIQ-02 isolation evidence/);
+});
+test("the confirmed design review must cover every rubric dimension", () => rejects((e) => { e.design_review.rubric_verdicts.pop(); }, /rubric dimensions mismatch/));
+test("checkpoint tasks require recorded answers", () => rejects((e) => { delete e.checkpoints["254-15-02"]; }, /checkpoint answer IDs mismatch/));
+test("the recorded 254-03-03 disposition is grounded in its summary, and 254-18-02 waits for a recorded outcome", () => {
+  const summaries = [
+    { name: "254-03-SUMMARY.md", source: fs.readFileSync(path.join(phaseDir, "254-03-SUMMARY.md"), "utf8") },
+    { name: "254-15-SUMMARY.md", source: fs.readFileSync(path.join(phaseDir, "254-15-SUMMARY.md"), "utf8") },
+  ];
+  const noEscalation = { metrics: { final: { runs: [] } }, deviations: [], known_reds: [] };
+  const beforeSummary = generator.checkpointAnswers(root, noEscalation, summaries);
+  assert.equal(beforeSummary["254-03-03"], "fix-in-phase; accept-known-red for KR-254-06");
+  assert.equal(beforeSummary["254-18-02"], "");
+
+  const recordedSummary = { ...summaries[0], name: "254-18-SUMMARY.md", source: "254-18-02 escalation not required (0 unmatched reds)" };
+  assert.equal(generator.checkpointAnswers(root, noEscalation, [...summaries, recordedSummary])["254-18-02"], "not required");
+
+  const unresolved = {
+    ...noEscalation,
+    deviations: [{ kind: "final-triage", entries: [{ job: "other", step: "step", run_id: 5, classification: "environmental" }] }],
+  };
+  const needsOwner = generator.checkpointAnswers(root, unresolved, summaries);
+  assert.equal(needsOwner["254-18-02"], "");
+  const ownerDecision = { ...recordedSummary, source: "254-18-02 entry x: fix-in-phase" };
+  assert.equal(generator.checkpointAnswers(root, unresolved, [...summaries, ownerDecision])["254-18-02"], "fix-in-phase");
+});
+test("summary acceptance requires human_judgment false and green evidence", () => {
+  rejects((e) => { e.summaries[0].coverage[0].human_judgment = true; }, /SUMMARY has missing or human-judgment-only/);
+  rejects((e) => { delete e.summaries[0].coverage[0].human_judgment; }, /SUMMARY has missing or human-judgment-only/);
+});
+test("pendingInputs reports only the current plan summary and refuses early UAT writes", () => {
+  const temp = fs.mkdtempSync(path.join(os.tmpdir(), "phase254-pending-"));
+  const fixturePhase = path.join(temp, ".planning", "phases", generator.PHASE_SLUG);
+  fs.mkdirSync(fixturePhase, { recursive: true });
+  try {
+    for (const name of generator.SUMMARY_NAMES ?? Array.from({ length: 17 }, (_, index) => `254-${String(index + 1).padStart(2, "0")}-SUMMARY.md`)) {
+      if (name === "254-18-SUMMARY.md") continue;
+      fs.writeFileSync(path.join(fixturePhase, name), "placeholder\n");
+    }
+    assert.deepEqual(generator.pendingInputs({ root: temp }), ["254-18-SUMMARY.md"]);
+    assert.throws(() => generator.generatePhase254Acceptance({ root: temp, latest: true, writeUat: true }), /refusing to generate 254-UAT\.md/);
+  } finally {
+    fs.rmSync(temp, { recursive: true, force: true });
+  }
+});
+
+test("generated UAT equals the project renderer after complete summaries and verification exist", () => {
+  const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "phase254-uat-render-"));
+  const tempPhase = path.join(tempRoot, ".planning", "phases", generator.PHASE_SLUG);
+  fs.mkdirSync(tempPhase, { recursive: true });
+  try {
+    for (const name of generator.SUMMARY_NAMES.slice(0, 17)) fs.copyFileSync(path.join(phaseDir, name), path.join(tempPhase, name));
+    fs.writeFileSync(path.join(tempPhase, "254-18-SUMMARY.md"), `---\nstatus: complete\ncompleted: 2026-11-03\ncoverage:\n  - id: T1\n    description: "Phase 254 final automated contract"\n    requirement: CIQ-04\n    verification:\n      - kind: command\n        ref: "node scripts/ci/generate_phase254_acceptance.test.mjs"\n        status: pass\n    human_judgment: false\n---\n`);
+    fs.writeFileSync(path.join(tempPhase, "254-VERIFICATION.md"), "---\nstatus: passed\nbehavior_unverified: 0\n---\n");
+    const summaries = generator.validateCompletedSummaries({ root: tempRoot });
+    assert.equal(generator.renderUat(summaries), renderAutomatedUat(tempPhase));
+  } finally {
+    fs.rmSync(tempRoot, { recursive: true, force: true });
+  }
+});
