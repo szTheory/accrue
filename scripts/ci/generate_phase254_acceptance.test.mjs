@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { spawnSync } from "node:child_process";
 import crypto from "node:crypto";
 import fs from "node:fs";
 import os from "node:os";
@@ -49,7 +50,8 @@ function fixtureEvidence() {
     status: "pass",
     skipped: 0,
     retries: 0,
-    evidence_refs: [task.id === "254-05-01" ? "live isolation test: 403 in review lane, test lane 200" :
+    evidence_refs: [`254-VALIDATION.md#task-${task.id}`],
+    supporting_refs: [task.id === "254-05-01" ? "live isolation test: 403 in review lane, test lane 200" :
       task.id === "254-05-02" ? "interleaved race control, reconciliation and dependent project identity pass" :
         task.id === "254-02-03" ? "pure-story classifier and ownership contract pass" :
           task.automated ? `${task.plan}-SUMMARY.md#${task.id}` : ({
@@ -65,6 +67,7 @@ function fixtureEvidence() {
     task_id: task.id,
     requirements: [...task.requirements],
     evidence_refs: taskResults[task.id].evidence_refs,
+    supporting_refs: taskResults[task.id].supporting_refs,
     command_sha256: taskResults[task.id].command_sha256,
     status: "pass",
     skipped: 0,
@@ -91,7 +94,7 @@ function fixtureEvidence() {
     status: "complete",
     coverage: metadata.tasks.filter((task) => task.plan === plan.name.replace("-PLAN.md", "")).map((task) => ({
       human_judgment: false,
-      verification: taskResults[task.id].evidence_refs.map((ref) => ({ ref, status: "pass" })),
+      verification: taskResults[task.id].supporting_refs.map((ref) => ({ ref, status: "pass" })),
     })),
   }));
   const mintRunIds = [...new Set(Object.values(manifestEntries).filter((entry) => entry.provenance !== "phase211-committed" && entry.mint_run_id != null).map((entry) => String(entry.mint_run_id)))].sort();
@@ -177,14 +180,16 @@ test("every explicit edge is bound to its named test identities, source file and
 
 test("a missing requirement is rejected", () => rejects((e) => e.metadata.requirements.pop(), /requirement IDs mismatch/));
 test("a task without executed evidence is rejected", () => rejects((e) => { delete e.tasks["254-14-02"]; }, /task evidence IDs mismatch/));
-test("task evidence is bound to the task ID, exact planned command and task-specific summary result", () => {
+test("task evidence is bound to the task ID, exact planned command and task-specific validation result", () => {
   rejects((e) => { delete e.task_results["254-14-02"]; }, /per-task result IDs mismatch/);
   rejects((e) => { e.task_results["254-14-02"].command_sha256 = "0".repeat(64); }, /command identity mismatch/);
-  rejects((e) => { e.task_results["254-14-02"].evidence_refs = ["254-13-SUMMARY.md#254-13-02"]; }, /not present in its own plan summary/);
+  rejects((e) => { e.task_results["254-14-02"].task_id = "254-14-01"; }, /task evidence command identity mismatch/);
+  rejects((e) => { e.task_results["254-14-02"].evidence_refs = ["254-14-SUMMARY.md#plan-level-green"]; }, /no matching task-specific green result/);
+  rejects((e) => { e.task_results["254-14-02"].supporting_refs = ["254-13-SUMMARY.md#254-13-02"]; }, /no matching task-specific green result/);
   rejects((e) => { e.task_results["254-14-02"].status = "failed"; }, /has no executed green evidence/);
   rejects((e) => { e.task_results["254-14-02"].skipped = 1; }, /skipped tests/);
 });
-test("plan-level summary coverage cannot mark a task green without its own matching result", () => {
+test("generic plan-level and sibling-task refs cannot stand in for the task-specific result", () => {
   const task = generator.inspectPhase254Metadata({ root }).tasks.find(({ id }) => id === "254-01-01");
   const summaryRefs = ["254-01-SUMMARY.md#plan-level-green"];
   assert.equal(generator.taskResultIsGreen(task, null, summaryRefs, {}), false);
@@ -194,9 +199,12 @@ test("plan-level summary coverage cannot mark a task green without its own match
     status: "pass",
     skipped: 0,
     retries: 0,
-    evidence_refs: summaryRefs,
+    evidence_refs: [`254-VALIDATION.md#task-${task.id}`],
+    supporting_refs: ["254-01-SUMMARY.md#plan-level-green"],
   };
   assert.equal(generator.taskResultIsGreen(task, result, summaryRefs, {}), true);
+  assert.equal(generator.taskResultIsGreen(task, { ...result, evidence_refs: ["254-01-SUMMARY.md#plan-level-green"] }, summaryRefs, {}), false);
+  assert.equal(generator.taskResultIsGreen(task, { ...result, evidence_refs: ["254-VALIDATION.md#task-254-01-02"] }, summaryRefs, {}), false);
   assert.equal(generator.taskResultIsGreen(task, { ...result, command_sha256: "0".repeat(64) }, summaryRefs, {}), false);
 });
 test("skipped or retried test evidence is rejected", () => {
@@ -239,8 +247,8 @@ test("AMD-254-06 is required for multiple mint identities and must name the exac
 });
 test("CIQ-02 needs the isolation identities, pure-story classifier and fan-out decision", () => {
   rejects((e) => {
-    e.tasks["254-05-01"].evidence_refs = ["review lane works"];
-    e.task_results["254-05-01"].evidence_refs = ["review lane works"];
+    e.tasks["254-05-01"].supporting_refs = ["review lane works"];
+    e.task_results["254-05-01"].supporting_refs = ["review lane works"];
     e.summaries.find(({ name }) => name === "254-05-SUMMARY.md").coverage.find((entry) => entry.verification.some(({ ref }) => ref === "live isolation test: 403 in review lane, test lane 200")).verification[0].ref = "review lane works";
   }, /CIQ-02 isolation evidence/);
   rejects((e) => { e.budget.deviations = e.budget.deviations.filter((row) => row.kind !== "ciq02-fanout-enabled"); }, /CIQ-02 isolation evidence/);
@@ -301,6 +309,87 @@ test("pendingInputs reports only the current plan summary and refuses early UAT 
     }
     assert.deepEqual(generator.pendingInputs({ root: temp }), ["254-18-SUMMARY.md"]);
     assert.throws(() => generator.generatePhase254Acceptance({ root: temp, latest: true, writeUat: true }), /refusing to generate 254-UAT\.md/);
+  } finally {
+    fs.rmSync(temp, { recursive: true, force: true });
+  }
+});
+
+test("--expect-pending succeeds only when the final summary is the sole missing input", () => {
+  const temp = fs.mkdtempSync(path.join(root, "accrue_admin", "tmp", "phase254-pending-cli-"));
+  const tempPhase = path.join(temp, ".planning", "phases", generator.PHASE_SLUG);
+  const tempScripts = path.join(temp, "scripts", "ci");
+  const tempBudget = path.join(temp, "accrue_admin", "storybook", "phase254-budget.json");
+  fs.mkdirSync(tempPhase, { recursive: true });
+  fs.mkdirSync(tempScripts, { recursive: true });
+  try {
+    fs.cpSync(phaseDir, tempPhase, { recursive: true, filter: (source) => path.basename(source) !== "254-18-SUMMARY.md" });
+    for (const name of ["generate_phase254_acceptance.mjs", "phase_evidence_path.mjs", "main_module.mjs", "verify_executable_uat_contract.mjs"]) {
+      fs.copyFileSync(path.join(root, "scripts", "ci", name), path.join(tempScripts, name));
+    }
+    const budget = readJson("accrue_admin/storybook/phase254-budget.json");
+    const head = spawnSync("git", ["rev-parse", "HEAD"], { cwd: root, encoding: "utf8" });
+    assert.equal(head.status, 0, head.stderr);
+    budget.metrics.final.head_sha = head.stdout.trim();
+    for (const run of budget.metrics.final.runs ?? []) if (run.head_sha) run.head_sha = head.stdout.trim();
+    const copyRepoFile = (relative) => {
+      const destination = path.join(temp, relative);
+      fs.mkdirSync(path.dirname(destination), { recursive: true });
+      fs.copyFileSync(path.join(root, relative), destination);
+    };
+    const ledger = readJson("accrue_admin/storybook/subscription-curation.json");
+    const visualCases = readJson("accrue_admin/storybook/phase254-visual-cases.json");
+    const review = readJson(`.planning/phases/${generator.PHASE_SLUG}/254-DESIGN-REVIEW.json`);
+    const manifest = readJson("accrue_admin/e2e/__screenshots__/visual-desktop/manifest.json");
+    const files = new Set([
+      "accrue_admin/storybook/subscription-curation.json",
+      "accrue_admin/storybook/phase254-visual-cases.json",
+      "accrue_admin/e2e/__screenshots__/visual-desktop/manifest.json",
+      "storybook/phase252-manifest.json",
+      "accrue_admin/lib/accrue_admin/live/subscriptions_live.ex",
+      "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+      "accrue_admin/assets/css/app.css",
+      "accrue_admin/assets/css/theme.css",
+      "accrue_admin/priv/static/accrue_admin.css",
+      "accrue_admin/priv/static/storybook.css",
+      ...Object.keys(review.assets).map((key) => review.assets[key].path).filter(Boolean),
+      ...Object.keys(ledger.source_digests ?? {}),
+      ...generator.EDGE_IDS.map((id) => generator.EDGE_BINDINGS[id].source_path),
+      ...Object.values(manifest.entries ?? manifest).map((entry) => `accrue_admin/e2e/__screenshots__/visual-desktop/${entry.file}`),
+    ]);
+    for (const relative of files) copyRepoFile(relative);
+    fs.mkdirSync(path.dirname(tempBudget), { recursive: true });
+    fs.writeFileSync(tempBudget, `${JSON.stringify(budget, null, 2)}\n`);
+    const script = path.join(tempScripts, "generate_phase254_acceptance.mjs");
+    const childEnv = { ...process.env };
+    delete childEnv.NODE_TEST_CONTEXT;
+    const expectedPending = spawnSync(process.execPath, [script, "--latest", "--expect-pending", "254-18"], { cwd: temp, encoding: "utf8", env: childEnv });
+    assert.equal(expectedPending.status, 0, expectedPending.stderr);
+    const result = JSON.parse(expectedPending.stdout);
+    assert.equal(result.status, "pending");
+    assert.equal(result.completed_summary_count, 17);
+    assert.equal(result.tasks.length, 51);
+    assert.equal(result.final_runs.length, 4);
+    assert.deepEqual(result.pending_inputs, ["254-18-SUMMARY.md"]);
+    assert.equal(result.uat_written, false);
+
+    const validationPath = path.join(tempPhase, "254-VALIDATION.md");
+    const validation = fs.readFileSync(validationPath, "utf8");
+    fs.unlinkSync(validationPath);
+    const missingValidation = spawnSync(process.execPath, [script, "--latest", "--expect-pending", "254-18"], { cwd: temp, encoding: "utf8", env: childEnv });
+    assert.notEqual(missingValidation.status, 0);
+    fs.writeFileSync(validationPath, validation);
+
+    const budgetBytes = fs.readFileSync(tempBudget);
+    fs.unlinkSync(tempBudget);
+    const missingBudget = spawnSync(process.execPath, [script, "--latest", "--expect-pending", "254-18"], { cwd: temp, encoding: "utf8", env: childEnv });
+    assert.notEqual(missingBudget.status, 0);
+    fs.writeFileSync(tempBudget, budgetBytes);
+
+    const unexpectedPending = spawnSync(process.execPath, [script, "--latest", "--expect-pending", "254-17"], { cwd: temp, encoding: "utf8", env: childEnv });
+    assert.notEqual(unexpectedPending.status, 0);
+    fs.unlinkSync(path.join(tempPhase, "254-17-SUMMARY.md"));
+    const extraMissing = spawnSync(process.execPath, [script, "--latest", "--expect-pending", "254-18"], { cwd: temp, encoding: "utf8", env: childEnv });
+    assert.notEqual(extraMissing.status, 0);
   } finally {
     fs.rmSync(temp, { recursive: true, force: true });
   }

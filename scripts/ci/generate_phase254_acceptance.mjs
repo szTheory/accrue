@@ -314,7 +314,16 @@ function loadSummary(root, name) {
   if (coverage.length === 0) fail(`${name} has no executable coverage`);
   const completed = scalar(fm, "completed") ?? scalar(fm, "completed_date");
   if (!/^\d{4}-\d{2}-\d{2}$/.test(completed ?? "")) fail(`${name} needs a deterministic completed date`);
-  return { name, absolute, source, frontmatter: fm, status: "complete", human_judgment: scalar(fm, "human_judgment") ?? null, coverage, completed };
+  return {
+    name,
+    absolute,
+    source,
+    frontmatter: fm,
+    status: "complete",
+    human_judgment: scalar(fm, "human_judgment") ?? null,
+    coverage,
+    completed,
+  };
 }
 function currentValidationRows(root) {
   const source = phaseFile(root, "254-VALIDATION.md").source;
@@ -348,20 +357,24 @@ function expectedTaskCommand(task) {
 function expectedTaskDisplayCommand(task) {
   return task.automated ?? `checkpoint:decision (recorded answer for ${task.id})`;
 }
+function taskResultRef(taskId) { return `${path.basename(VALIDATION_PATH)}#task-${taskId}`; }
 function evidenceRefsForPlan(summaries, plan) {
   return summaries.find(({ name }) => name === `${plan}-SUMMARY.md`)
     ?.coverage.flatMap((entry) => entry.verification.map(({ ref }) => ref)) ?? [];
 }
-export function taskResultIsGreen(task, result, summaryRefs, checkpointRecord) {
+export function taskResultIsGreen(task, result, summaryRefs, checkpointRecord, { allowPendingSupport = false } = {}) {
   if (!result || result.task_id !== task.id || result.status !== "pass" || result.skipped !== 0 || result.retries !== 0) return false;
-  if (result.command_sha256 !== sha256(expectedTaskCommand(task)) || !Array.isArray(result.evidence_refs) || result.evidence_refs.length === 0) return false;
+  const expectedCommandSha = sha256(expectedTaskCommand(task));
+  const expectedRef = taskResultRef(task.id);
+  if (result.command_sha256 !== expectedCommandSha || !Array.isArray(result.evidence_refs) ||
+      result.evidence_refs.length !== 1 || result.evidence_refs[0] !== expectedRef) return false;
+  if (!Array.isArray(result.supporting_refs) || result.supporting_refs.length === 0) return false;
   if (task.checkpoint) {
-    const expectedRef = CHECKPOINT_EVIDENCE_REFS[task.id];
     return result.checkpoint_answer === checkpointRecord?.[task.id] &&
-      result.evidence_refs.length === 1 && result.evidence_refs[0] === expectedRef &&
+      result.supporting_refs.length === 1 && result.supporting_refs[0] === CHECKPOINT_EVIDENCE_REFS[task.id] &&
       typeof result.checkpoint_answer === "string" && result.checkpoint_answer.length > 0;
   }
-  return result.evidence_refs.every((ref) => summaryRefs.includes(ref));
+  return allowPendingSupport || result.supporting_refs.every((ref) => summaryRefs.includes(ref));
 }
 function markdownCell(value) {
   return String(value ?? "—").replaceAll("|", "&#124;").replaceAll("\n", "<br>").trim() || "—";
@@ -379,13 +392,13 @@ export function writeValidationMap({ root = ROOT } = {}) {
   const rows = metadata.tasks.map((task) => {
     const summary = summaryByPlan.get(task.plan);
     const result = taskResults[task.id];
-    let green = taskResultIsGreen(task, result, summary?.coverage.flatMap((entry) => entry.verification.map(({ ref }) => ref)) ?? [], cp);
+    let green = taskResultIsGreen(task, result, summary?.coverage.flatMap((entry) => entry.verification.map(({ ref }) => ref)) ?? [], cp, { allowPendingSupport: !summary && task.plan === "254-18" });
     const command = expectedTaskDisplayCommand(task);
     const exists = task.files.length === 0 ? "n/a" : task.files.every((relative) => fs.existsSync(safePath(repository, relative, `${task.id} owned file`))) ? "yes" : "no";
     if (exists === "no") green = false;
     return {
       task,
-      cells: [task.id, task.plan, task.wave ?? "—", task.requirements.join(", "), task.threat_refs.join(", ") || "—", task.name, task.type, command, exists, green ? "✅ green" : "⬜ pending"],
+      cells: [task.id, task.plan, task.wave ?? "—", task.requirements.join(", "), task.threat_refs.join(", ") || "—", `${task.name} <a id="task-${task.id}"></a>`, task.type, command, exists, green ? "✅ green" : "⬜ pending"],
       green,
     };
   });
@@ -405,19 +418,22 @@ export function writeValidationMap({ root = ROOT } = {}) {
   fs.writeFileSync(safePath(repository, VALIDATION_PATH, "Phase 254 validation map"), updated);
   return { task_count: rows.length, green_count: rows.filter(({ green }) => green).length, pending: rows.filter(({ green }) => !green).map(({ task }) => task.id), nyquist_compliant: allGreen, wave_0_complete: allGreen };
 }
-function taskEvidence(metadata, summaries, validationRows, taskResults, checkpointRecord) {
+function taskEvidence(metadata, summaries, validationRows, taskResults, checkpointRecord, { allowPendingFinalSummary = false } = {}) {
   const result = {};
   for (const task of metadata.tasks) {
     const summaryRefs = evidenceRefsForPlan(summaries, task.plan);
     const validationRow = validationRows.get(task.id);
     const taskResult = taskResults[task.id];
-    const executed = taskResultIsGreen(task, taskResult, summaryRefs, checkpointRecord) &&
+    const executed = taskResultIsGreen(task, taskResult, summaryRefs, checkpointRecord, {
+      allowPendingSupport: allowPendingFinalSummary && task.plan === "254-18",
+    }) &&
       validationRow?.command === expectedTaskDisplayCommand(task) && validationRow?.status === "✅ green";
     result[task.id] = {
       plan: task.plan,
       task_id: task.id,
       requirements: task.requirements,
       evidence_refs: taskResult?.evidence_refs ?? [],
+      supporting_refs: taskResult?.supporting_refs ?? [],
       command_sha256: taskResult?.command_sha256 ?? null,
       status: executed ? "pass" : "missing",
       skipped: taskResult?.skipped ?? null,
@@ -489,7 +505,7 @@ export function checkpointAnswers(root, budget, summaries) {
   };
 }
 
-function collectEvidence(root) {
+function collectEvidence(root, { allowPendingFinalSummary = false } = {}) {
   const repository = fs.realpathSync(root);
   const metadata = inspectPhase254Metadata({ root: repository });
   const summaries = SUMMARY_NAMES.filter((name) => fs.existsSync(summaryPath(repository, name))).map((name) => loadSummary(repository, name));
@@ -559,7 +575,7 @@ function collectEvidence(root) {
     root: repository,
     metadata,
     summaries,
-    tasks: taskEvidence(metadata, summaries, validationRows, taskResults, checkpointRecord),
+    tasks: taskEvidence(metadata, summaries, validationRows, taskResults, checkpointRecord, { allowPendingFinalSummary }),
     task_results: taskResults,
     edge_evidence: edgeEvidence,
     prohibitions: metadata.prohibition_statements.map((statement) => {
@@ -592,11 +608,12 @@ function collectEvidence(root) {
 }
 export const collectPhase254Evidence = collectEvidence;
 
-export function validatePhase254Evidence(evidence) {
+export function validatePhase254Evidence(evidence, { allowPendingFinalSummary = false } = {}) {
   object(evidence, "acceptance evidence");
   const metadata = object(evidence.metadata, "phase metadata");
   exactSet(metadata.requirements, REQUIREMENT_IDS, "requirement IDs");
   const taskIds = metadata.tasks.map((task) => task.id);
+  exactSet(evidence.summaries?.map(({ name }) => name) ?? [], allowPendingFinalSummary ? SUMMARY_NAMES.slice(0, -1) : SUMMARY_NAMES, "completed Phase 254 summaries");
   if (!Array.isArray(evidence.summaries) || evidence.summaries.some((summary) => summary.status !== "complete" || summary.coverage.some((row) => row.human_judgment !== false || row.verification.some((verification) => verification.status !== "pass")))) {
     fail("a SUMMARY has missing or human-judgment-only acceptance evidence");
   }
@@ -614,12 +631,17 @@ export function validatePhase254Evidence(evidence) {
     if (result.status !== "pass" || !Array.isArray(result.evidence_refs) || result.evidence_refs.length === 0) fail(`${task.id} has no executed green evidence`);
     if ((result.skipped ?? 0) !== 0) fail(`${task.id} evidence contains skipped tests`);
     if ((result.retries ?? 0) !== 0) fail(`${task.id} evidence contains retried tests`);
+    if (!taskResultIsGreen(task, result, evidenceRefsForPlan(evidence.summaries, task.plan), evidence.checkpoints, {
+      allowPendingSupport: allowPendingFinalSummary && task.plan === "254-18",
+    })) {
+      fail(`${task.id} has no matching task-specific green result in ${path.basename(VALIDATION_PATH)}`);
+    }
     if (task.checkpoint) {
-      if (result.checkpoint_answer !== evidence.checkpoints?.[task.id] || result.evidence_refs.length !== 1 || result.evidence_refs[0] !== CHECKPOINT_EVIDENCE_REFS[task.id]) {
+      if (result.checkpoint_answer !== evidence.checkpoints?.[task.id] || result.supporting_refs.length !== 1 || result.supporting_refs[0] !== CHECKPOINT_EVIDENCE_REFS[task.id]) {
         fail(`${task.id} checkpoint evidence does not match its recorded answer`);
       }
-    } else if (result.evidence_refs.some((ref) => !evidenceRefsForPlan(evidence.summaries, task.plan).includes(ref))) {
-      fail(`${task.id} evidence reference is not present in its own plan summary`);
+    } else if (!(allowPendingFinalSummary && task.plan === "254-18") && result.supporting_refs.some((ref) => !evidenceRefsForPlan(evidence.summaries, task.plan).includes(ref))) {
+      fail(`${task.id} supporting evidence is not present in its own plan summary`);
     }
     if (row.status !== "pass" || !Array.isArray(row.evidence_refs) || row.evidence_refs.length === 0) fail(`${task.id} has no executed green evidence`);
     if ((row.skipped ?? 0) !== 0) fail(`${task.id} evidence contains skipped tests`);
@@ -627,6 +649,7 @@ export function validatePhase254Evidence(evidence) {
     exactSet(row.requirements, task.requirements, `${task.id} requirement bindings`);
     if (row.automated_command !== expectedTaskDisplayCommand(task)) fail(`${task.id} has no matching executable verification command`);
     if (JSON.stringify(row.evidence_refs) !== JSON.stringify(result.evidence_refs)) fail(`${task.id} task evidence does not match its recorded result`);
+    if (JSON.stringify(row.supporting_refs) !== JSON.stringify(result.supporting_refs)) fail(`${task.id} task evidence does not match its task-specific support references`);
   }
   exactSet(Object.keys(evidence.edge_evidence ?? {}), [...EDGE_IDS], "explicit edge evidence IDs");
   for (const id of EDGE_IDS) {
@@ -684,9 +707,9 @@ export function validatePhase254Evidence(evidence) {
     const entry = evidence.manifest.entries[capture.key];
     if (!entry || entry.sha256 !== capture.png_sha256) fail(`design review capture is stale or missing from the manifest: ${capture.key}`);
   }
-  const isolation = evidence.tasks["254-05-01"]?.evidence_refs?.join("\n") ?? "";
+  const isolation = evidence.tasks["254-05-01"]?.supporting_refs?.join("\n") ?? "";
   const fanout = (evidence.budget.deviations ?? []).some((item) => item.kind === "ciq02-fanout-enabled" || item.kind === "ciq02-fanout-deferred");
-  if (!/403/.test(isolation) || !/isolation/.test(isolation) || !/interleav|race|reconcil|dependent/i.test(evidence.tasks["254-05-02"]?.evidence_refs?.join("\n") ?? "") || !/pure-story|classifier|ownership/i.test(evidence.tasks["254-02-03"]?.evidence_refs?.join("\n") ?? "") || !fanout) {
+  if (!/403/.test(isolation) || !/isolation/.test(isolation) || !/interleav|race|reconcil|dependent/i.test(evidence.tasks["254-05-02"]?.supporting_refs?.join("\n") ?? "") || !/pure-story|classifier|ownership/i.test(evidence.tasks["254-02-03"]?.supporting_refs?.join("\n") ?? "") || !fanout) {
     fail("CIQ-02 isolation evidence or the Phase 254 fan-out record is missing");
   }
   if (evidence.checkpoints["254-18-02"] === "not required" && evidence.escalation_count !== 0) fail("254-18-02 cannot be marked not required while an escalation is present");
@@ -764,6 +787,30 @@ export function generatePhase254Acceptance({ root = ROOT, latest = false, writeU
   if (!latest) fail("usage: node generate_phase254_acceptance.mjs --latest [--write-uat] [--expect-pending 254-18]");
   const missing = pendingInputs({ root });
   if (writeUat && missing.length > 0) fail(`refusing to generate 254-UAT.md while summaries are pending: ${missing.join(", ")}`);
+  if (missing.length > 0) {
+    const onlyFinalSummaryPending = missing.length === 1 && missing[0] === SUMMARY_NAMES.at(-1);
+    if (onlyFinalSummaryPending) {
+      const evidence = validatePhase254Evidence(collectEvidence(root, { allowPendingFinalSummary: true }), { allowPendingFinalSummary: true });
+      return {
+        evidence: { ...evidence, status: "pending", completed_summary_count: SUMMARY_NAMES.length - 1 },
+        pending: missing,
+        uat_written: false,
+        uat_path: null,
+      };
+    }
+    const completedSummaries = SUMMARY_NAMES.filter((name) => !missing.includes(name)).map((name) => loadSummary(root, name));
+    return {
+      evidence: {
+        status: "pending",
+        phase: "254",
+        human_judgment: false,
+        completed_summary_count: completedSummaries.length,
+      },
+      pending: missing,
+      uat_written: false,
+      uat_path: null,
+    };
+  }
   const evidence = validatePhase254Evidence(collectEvidence(root));
   if (writeUat) {
     const summarySet = validateCompletedSummaries({ root });
