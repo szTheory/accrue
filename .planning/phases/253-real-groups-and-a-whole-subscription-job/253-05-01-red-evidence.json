@@ -1,0 +1,11 @@
+{
+  "command": "LANG=en_US.UTF-8 MIX_ENV=test PHASE252_TAP_REPORT=1 mix run --no-start test/accrue_admin/dev/subscription_compositions_manifest_test.exs",
+  "exitCode": 2,
+  "output": "TAP version 13\nok 1 - AccrueAdmin.SubscriptionCompositionsManifestBootTest::test compiled collection composition manifest is available\nok 2 - AccrueAdmin.SubscriptionCompositionsManifestTest::test manifest write verifies current source digests and keeps task 1 transport provenance\nok 3 - AccrueAdmin.SubscriptionCompositionsManifestTest::test compiled whole-page story declares every direct production-rendered variation\nok 4 - AccrueAdmin.SubscriptionCompositionsManifestTest::test duplicate identity, missing one_row, and empty declarations fail closed\nok 5 - AccrueAdmin.SubscriptionCompositionsManifestTest::test compiled one_row identity resolves to the mounted collection story and current transport\nok 6 - AccrueAdmin.SubscriptionCompositionsManifestTest::test whole-page manifest rejects malformed, missing, duplicate, and omitted variations\nnot ok 7 - AccrueAdmin.SubscriptionCompositionsManifestTest::test compiled collection inventory exposes every direct variation for responsive evidence\n1..7\n",
+  "stderr": "",
+  "targetTest": "AccrueAdmin.SubscriptionCompositionsManifestTest::test compiled collection inventory exposes every direct variation for responsive evidence",
+  "targetFile": "accrue_admin/test/accrue_admin/dev/subscription_compositions_manifest_test.exs",
+  "expected": "The compiled manifest exposes direct entries for every declared collection variation.",
+  "actual": "Manifest.collection_variation_entries/0 is not exported; the named assertion failed while the seven-test TAP report and neighboring assertions passed.",
+  "semanticAssessment": "The uniquely named target executed and failed its function_exported? assertion because the compiled manifest had no full collection variation inventory; all six neighboring assertions passed. This is the planned gap, not a compile, load, or fixture failure."
+}

@@ -90,3 +90,29 @@ test("held-out setup cleans a partially written edge fixture when seeding fails"
   await assert.rejects(setup(), /seed failed/);
   assert.deepEqual(operations, ["sandbox-setup", "seed-failed", "edge-cleanup", "teardown"]);
 });
+
+test("held-out cleanup locks its customer before validating children and deleting rows", () => {
+  const source = fs.readFileSync(
+    path.join(repo, "examples/accrue_host/priv/repo/seeds/phase248_cleanup_edge.exs"),
+    "utf8"
+  );
+  const lock = source.indexOf('lock: "FOR UPDATE"');
+  const childGuard = source.indexOf("Phase 248 edge cleanup found an unrelated customer child");
+  const firstDelete = source.indexOf("Repo.delete!(row)");
+
+  assert.notEqual(lock, -1, "customer row must be locked against new FK children");
+  assert.ok(lock < childGuard, "the lock must precede the child-set guard");
+  assert.ok(childGuard < firstDelete, "all child checks must precede deletion");
+});
+
+test("held-out cleanup binds the exact customer ID to its expected synthetic owner", () => {
+  const source = fs.readFileSync(
+    path.join(repo, "examples/accrue_host/priv/repo/seeds/phase248_cleanup_edge.exs"),
+    "utf8"
+  );
+  const ownerGuard = source.indexOf('customer.owner_id != "314e6b2c-fd88-45b9-85b4-2623f3dc35aa"');
+  const firstDelete = source.indexOf("Repo.delete!(row)");
+
+  assert.notEqual(ownerGuard, -1, "cleanup must verify the fixture's exact owner identity");
+  assert.ok(ownerGuard < firstDelete, "owner validation must happen before deletion");
+});

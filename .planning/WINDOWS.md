@@ -2,9 +2,9 @@
 schema_version: 1
 open_count: 0
 waived_count: 12
-fixed_count: 26
-total_count: 38
-last_updated: 2026-10-25T01:38:50.931Z
+fixed_count: 30
+total_count: 42
+last_updated: 2026-10-28T19:31:59.142Z
 ---
 
 # Broken Windows Ledger
@@ -53,6 +53,10 @@ last_updated: 2026-10-25T01:38:50.931Z
 | 36 | 244 | deviation | examples/accrue_host/e2e/phase244-operator-evidence.spec.js |  | Mounted browser read-outage state remained unobserved; focused LiveView tests verify read-retry behavior. | waived | Owner: Accrue maintainer (szTheory). Rationale: the mounted browser read-outage state cannot be observed in the browser harness; focused LiveView tests cover read-retry. Release impact: none. | 2026-10-11T02:32:19.747Z | 2026-10-25T01:38:50.931Z |
 | 37 | 246 | deviation | accrue_admin/lib/accrue_admin/live/coupons_live.ex |  | Direct coupon q URLs preserve the default Valid selection. | fixed |  | 2026-10-11T16:56:32.083Z | 2026-10-25T01:38:42.214Z |
 | 38 | 247 | deviation | accrue_admin/assets/js/hooks/time_display.js | 4 | Rejected impossible ISO date/time components before browser formatting to prevent normalized, invented instants. | fixed |  | 2026-10-11T21:25:35.951Z | 2026-10-25T01:38:42.306Z |
+| 39 | 252 | deviation | accrue_admin/lib/accrue_admin/live/subscription_live.ex |  | Replaced unsupported HEEx fragment syntax with valid sibling roots, preserving the current page layout and DOM order. | fixed |  | 2026-10-26T23:05:45.518Z | 2026-10-26T23:05:56.929Z |
+| 40 | 252 | deviation | accrue_admin/test/accrue_admin/dev/subscription_story_slice_test.exs |  | Added a local TAP formatter to the self-starting DB-free ExUnit script so RED evidence could be classified without global test configuration changes. | fixed |  | 2026-10-26T23:05:45.601Z | 2026-10-26T23:05:57.006Z |
+| 41 | 252 | deviation | accrue_admin/test/accrue_admin/dev/subscription_scenarios_test.exs |  | Standalone DB-free tests start the installed Localize application and restore the Fake clock so Money.new/2 can run without Repo bootstrap. | fixed |  | 2026-10-26T23:26:11.679Z | 2026-10-28T19:31:59.030Z |
+| 42 | 253 | deviation | accrue_admin/lib/accrue_admin/live/subscription_live.ex | 2430 | Preserve authorized active organization scope on initial missing-detail denial. | fixed |  | 2026-10-27T18:50:44.929Z | 2026-10-28T19:31:59.142Z |
 
 ````json
 [
@@ -539,6 +543,58 @@ last_updated: 2026-10-25T01:38:50.931Z
     "recorded_at": "2026-10-11T21:25:35.951Z",
     "resolved_at": "2026-10-25T01:38:42.306Z",
     "milestone": "v1.66"
+  },
+  {
+    "id": 39,
+    "kind": "deviation",
+    "phase": "252",
+    "file": "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+    "line": null,
+    "description": "Replaced unsupported HEEx fragment syntax with valid sibling roots, preserving the current page layout and DOM order.",
+    "status": "fixed",
+    "reason": "",
+    "recorded_at": "2026-10-26T23:05:45.518Z",
+    "resolved_at": "2026-10-26T23:05:56.929Z",
+    "milestone": "v1.68"
+  },
+  {
+    "id": 40,
+    "kind": "deviation",
+    "phase": "252",
+    "file": "accrue_admin/test/accrue_admin/dev/subscription_story_slice_test.exs",
+    "line": null,
+    "description": "Added a local TAP formatter to the self-starting DB-free ExUnit script so RED evidence could be classified without global test configuration changes.",
+    "status": "fixed",
+    "reason": "",
+    "recorded_at": "2026-10-26T23:05:45.601Z",
+    "resolved_at": "2026-10-26T23:05:57.006Z",
+    "milestone": "v1.68"
+  },
+  {
+    "id": 41,
+    "kind": "deviation",
+    "phase": "252",
+    "file": "accrue_admin/test/accrue_admin/dev/subscription_scenarios_test.exs",
+    "line": null,
+    "description": "Standalone DB-free tests start the installed Localize application and restore the Fake clock so Money.new/2 can run without Repo bootstrap.",
+    "status": "fixed",
+    "reason": "",
+    "recorded_at": "2026-10-26T23:26:11.679Z",
+    "resolved_at": "2026-10-28T19:31:59.030Z",
+    "milestone": "v1.68"
+  },
+  {
+    "id": 42,
+    "kind": "deviation",
+    "phase": "253",
+    "file": "accrue_admin/lib/accrue_admin/live/subscription_live.ex",
+    "line": 2430,
+    "description": "Preserve authorized active organization scope on initial missing-detail denial.",
+    "status": "fixed",
+    "reason": "",
+    "recorded_at": "2026-10-27T18:50:44.929Z",
+    "resolved_at": "2026-10-28T19:31:59.142Z",
+    "milestone": "v1.68"
   }
 ]
 ````

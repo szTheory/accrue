@@ -630,6 +630,9 @@ async function clickActionTrigger(page, target) {
 
   const menu = page.locator("[data-ax-action-overflow-menu]").first();
   await expect(menu, `${target.name}: overflow action menu`).toBeVisible();
+  // A click toggles the menu, so it must be known to be closed first (a menu a previous overlay is
+  // still closing would be toggled shut by this click and the item would never become visible).
+  await expect(menu, `${target.name}: overflow action menu is closed before it is opened`).toHaveJSProperty("open", false);
   await menu.click();
 
   const item = page.getByRole("menuitem", { name: target.trigger }).first();
@@ -869,6 +872,7 @@ test.describe("Phase 199 interaction and overlay contract", () => {
     const openInvoiceReview = async () => {
       const menu = page.locator("[data-ax-action-overflow-menu]").first();
       await expect(menu, "invoice action menu trigger").toBeVisible();
+      await expect(menu, "invoice action menu is closed before Enter toggles it open").toHaveJSProperty("open", false);
       await menu.locator("summary").focus();
       await page.keyboard.press("Enter");
       const item = page.getByRole("menuitem", { name: /Void invoice/i }).first();
@@ -892,7 +896,12 @@ test.describe("Phase 199 interaction and overlay contract", () => {
 
     await page.keyboard.press("Escape");
     await assertNoStaleOverlayState(page, "rapid reduced-motion invoice review dismissal");
-    await expect(page.locator("#main-content"), "removed review opener uses logical page focus").toBeFocused();
+    // 254-12 (A11Y-254-29): the review opener lived in an action menu that closed with the drawer, so
+    // focus returns to the menu button that owns it (WAI-ARIA menu button), not to the page container.
+    await expect(
+      page.locator("[data-ax-action-overflow-menu]").first().locator("summary"),
+      "the removed review opener returns focus to its owning menu button",
+    ).toBeFocused();
     await assertTopPointerTarget(page.locator("[data-theme-target='system']"), "theme control after drawer teardown");
 
     const reopened = await openInvoiceReview();

@@ -34,15 +34,18 @@
 //                                   on either side, or a disagreeing pair,
 //                                   fails naming both sides.
 // Always on (anti-vacuity, per this repo's convention): zero parsed
-// requirements fails; a traceability table that parses data rows but zero
-// Complete rows fails loudly naming the parsed count (that is the shape a
-// renamed or reshaped header produces); an empty phases corpus fails.
+// requirements fails; malformed or missing requirement rows fail. An unfinished
+// milestone must have a nonempty, bijective, unchecked table with known statuses
+// and valid phase cells. It reports NOT_APPLICABLE, never an evidence pass.
+// Any declared Complete requirement still requires a nonempty evidence corpus.
 
 import assert from "node:assert/strict";
+import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
+import { fileURLToPath } from "node:url";
 import { isMainModule } from "./main_module.mjs";
 
 const fail = (message) => { throw new Error(`completion evidence: FAIL: ${message}`); };
@@ -55,6 +58,7 @@ const TABLE_DIVIDER_PATTERN = /^\|[\s:|-]+\|$/;
 const FUTURE_SECTION_PATTERN = /^##\s+Future Requirements\s*$/i;
 const SECTION_PATTERN = /^##\s+\S/;
 const FRONT_MATTER_STATUS_PATTERN = /^status:\s*(\S+)\s*$/m;
+const UNFINISHED_STATUSES = new Set(["pending", "in progress", "blocked", "incomplete"]);
 
 // -- parsing ---------------------------------------------------------------
 
@@ -84,8 +88,8 @@ export function parseRequirements(text) {
       if (!trimmed.startsWith("|")) { inTable = false; }
       else {
         const cells = trimmed.slice(1, -1).split("|").map((cell) => cell.trim());
+        tableDataRows += 1;
         if (cells.length >= 3) {
-          tableDataRows += 1;
           const id = cells[0];
           if (new RegExp(`^${REQUIREMENT_ID}$`).test(id)) {
             if (rows.has(id)) fail(`traceability table lists ${id} more than once (line ${index + 1})`);
@@ -117,7 +121,7 @@ export function parseRequirements(text) {
 // The failure shape this exists to stop: a renamed or reshaped traceability
 // header means ZERO Complete rows parse, and a naive implementation then
 // reports "all 0 Complete requirements are evidenced: PASS". Both the
-// zero-parsed case and the rows-but-no-Complete case fail loudly, naming the
+// zero-parsed case and the rows-but-no-parsed-requirements case fail loudly, naming the
 // counts, so the miss is legible instead of green.
 export function assertParseNonVacuity(parsed) {
   const parsedCount = new Set([...parsed.bullets.keys(), ...parsed.rows.keys()]).size;
@@ -193,15 +197,26 @@ function frontMatterStatus(filePath) {
 }
 
 export function assertCompletionEvidence(repo, parsed) {
+  const complete = [...parsed.rows.values()].filter((row) => isComplete(row.status));
+  if (complete.length === 0) {
+    // No completion claim is a valid lifecycle state, not evidence of completion.
+    // Reconcile every unfinished claim even without --require-table-agreement.
+    if (!parsed.tableHeaderFound || parsed.rows.size === 0 || parsed.rows.size !== parsed.tableDataRows || parsed.bullets.size !== parsed.rows.size) {
+      fail("no Complete declarations require a nonempty, fully parsed traceability table matching every unchecked requirement bullet");
+    }
+    for (const row of parsed.rows.values()) {
+      const bullet = parsed.bullets.get(row.id);
+      if (!bullet || bullet.checked) fail(`${row.id} has no matching unchecked requirement bullet`);
+      if (!UNFINISHED_STATUSES.has(row.status.toLowerCase())) fail(`${row.id} has unknown unfinished status "${row.status}"`);
+      if (!/^Phase\s+\d+(?:\.\d+)*$/i.test(row.phase)) fail(`${row.id} has invalid unfinished phase "${row.phase}"`);
+    }
+    return 0;
+  }
+
   const phasesRoot = path.join(repo, ".planning", "phases");
   const milestonesRoot = path.join(repo, ".planning", "milestones");
   if (listDirs(phasesRoot).length === 0 && listDirs(milestonesRoot).length === 0) {
     fail("no phase directories exist under .planning/phases or .planning/milestones -- refusing to report an evidence pass over an empty corpus");
-  }
-
-  const complete = [...parsed.rows.values()].filter((row) => isComplete(row.status));
-  if (complete.length === 0) {
-    fail(`zero Complete requirements parsed from the traceability table (${parsed.tableDataRows} data rows seen) -- refusing to pass vacuously`);
   }
 
   let verified = 0;
@@ -444,6 +459,59 @@ function scenarioArchivedMilestonePhaseStillResolves() {
   });
 }
 
+function scenarioUnfinishedMilestoneNeedsNoCompletionEvidence() {
+  withScratch((dir) => {
+    const req = seed(dir, { requirements: requirementsDoc({ bulletState: " ", rowStatus: "Pending" }) });
+    const result = verifyCompletionEvidence(dir, req, { requireCompletionEvidence: true, requireTableAgreement: true });
+    assert.deepEqual(result, { parsed: 1, complete: 0, verified: 0, futureSkipped: 0 });
+    for (const rowStatus of ["In Progress", "Blocked", "Incomplete"]) {
+      fs.writeFileSync(req, requirementsDoc({ bulletState: " ", rowStatus }));
+      assert.equal(verifyCompletionEvidence(dir, req, { requireCompletionEvidence: true }).verified, 0);
+    }
+  });
+}
+
+function scenarioUnfinishedMilestoneRejectsMalformedClaims() {
+  const valid = requirementsDoc({ bulletState: " ", rowStatus: "Pending" });
+  const cases = [
+    ["missing table", requirementsDoc({ bulletState: " ", rowStatus: null })],
+    ["renamed table header", valid.replace("| Requirement | Phase | Status |", "| Req ID | Owning Phase | State |")],
+    ["checked unfinished requirement", requirementsDoc({ rowStatus: "Pending" })],
+    ["missing bullet", requirementsDoc({ bulletState: null, rowStatus: "Pending" })],
+    ["orphan pending row", requirementsDoc({ bulletState: " ", rowStatus: "Pending", extraRows: "| ZZZ-02 | Phase 999 | Pending |" })],
+    ["orphan unchecked bullet", requirementsDoc({ bulletState: " ", rowStatus: "Pending", extraBullets: "- [ ] **ZZZ-02**: another claim." })],
+    ["unparsed row", requirementsDoc({ bulletState: " ", rowStatus: "Pending", extraRows: "| not-an-id | Phase 999 | Complete |" })],
+    ["short malformed row", requirementsDoc({ bulletState: " ", rowStatus: "Pending", extraRows: "| ZZZ-02 | Complete |" })],
+    ["unknown status", requirementsDoc({ bulletState: " ", rowStatus: "Complte" })],
+    ["missing phase", requirementsDoc({ bulletState: " ", rowStatus: "Pending", phase: "" })],
+    ["invalid phase", requirementsDoc({ bulletState: " ", rowStatus: "Pending", phase: "Phase someday" })]
+  ];
+  for (const [name, requirements] of cases) {
+    withScratch((dir) => {
+      const req = seed(dir, { requirements });
+      assert.throws(() => verifyCompletionEvidence(dir, req, { requireCompletionEvidence: true }), /completion evidence: FAIL:/, name);
+    });
+  }
+}
+
+function scenarioUnfinishedCliReportsNoEvidenceAndPromotionFails() {
+  withScratch((dir) => {
+    const req = seed(dir, { requirements: requirementsDoc({ bulletState: " ", rowStatus: "Pending" }) });
+    const env = { ...process.env };
+    delete env.NODE_TEST_CONTEXT;
+    const run = () => spawnSync(process.execPath, [fileURLToPath(import.meta.url), "--repo", dir, "--require-completion-evidence", "--require-table-agreement"], { encoding: "utf8", env });
+    const pending = run();
+    assert.equal(pending.status, 0, pending.stderr);
+    assert.match(pending.stdout, /completion evidence: NOT_APPLICABLE/);
+    assert.match(pending.stdout, /no completion evidence claimed/);
+    assert.doesNotMatch(pending.stdout, /completion evidence: PASS/);
+    fs.writeFileSync(req, requirementsDoc());
+    const promoted = run();
+    assert.equal(promoted.status, 1, promoted.stdout);
+    assert.match(promoted.stderr, /no phase directories exist/);
+  });
+}
+
 const SCENARIOS = [
   ["a requirement marked Complete whose phase has no VERIFICATION.md fails, naming the requirement and the directory searched", scenarioCompleteWithoutVerificationFile],
   ["a requirement marked Complete whose phase verification is not passed fails, naming the observed status", scenarioCompleteWithNonPassingVerification],
@@ -456,7 +524,10 @@ const SCENARIOS = [
   ["an empty phases corpus fails rather than reporting an evidence pass", scenarioEmptyPhasesCorpus],
   ["a requirement marked Incomplete needs no evidence and passes alongside an evidenced Complete one", scenarioIncompleteRequirementNeedsNoEvidence],
   ["requirements under Future Requirements are skipped and the skipped count is reported", scenarioFutureRequirementsAreSkippedAndCounted],
-  ["a phase archived into .planning/milestones still resolves its evidence", scenarioArchivedMilestonePhaseStillResolves]
+  ["a phase archived into .planning/milestones still resolves its evidence", scenarioArchivedMilestonePhaseStillResolves],
+  ["a valid unfinished milestone needs no completion evidence or phase corpus", scenarioUnfinishedMilestoneNeedsNoCompletionEvidence],
+  ["unfinished milestones still reject missing, orphaned, malformed or contradictory claims", scenarioUnfinishedMilestoneRejectsMalformedClaims],
+  ["the unfinished CLI reports no evidence claim and promotion without evidence fails", scenarioUnfinishedCliReportsNoEvidenceAndPromotionFails]
 ];
 
 export function verifyFixtures() {
@@ -503,6 +574,10 @@ function main() {
   });
 
   const counts = `${result.parsed} parsed, ${result.complete} complete, ${result.verified} evidenced, ${result.futureSkipped} skipped as future`;
+  if (parsed.flags.has("require-completion-evidence") && result.complete === 0) {
+    console.log(`completion evidence: NOT_APPLICABLE (requirement consistency checked; ${counts}; no completion evidence claimed)`);
+    return;
+  }
   const suffix = requestedStrictFlags.length
     ? ` (verified: ${requestedStrictFlags.join(", ")}; ${counts})`
     : ` (schema-only: no strict flags supplied; ${counts})`;

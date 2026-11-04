@@ -81,20 +81,30 @@ defmodule AccrueAdmin.Components.Detail do
             :if={row_action_href(row)}
             href={row_action_href(row)}
             class="ax-summary-list-action"
+            aria-label={row_action_context(row)}
           >
             <span><%= row_action_label(row) %></span>
-            <span :if={row_action_context(row)} class="ax-visually-hidden"><%= " " <> row_action_context(row) %></span>
+            <span
+              :if={row_action_context(row)}
+              class="ax-visually-hidden"
+              aria-hidden="true"
+            ><%= " " <> row_action_context(row) %></span>
           </a>
           <button
             :if={!row_action_href(row) and row_action_event(row)}
             type="button"
             class="ax-summary-list-action"
+            aria-label={row_action_context(row)}
             phx-click={row_action_event(row)}
             phx-target={row_action_target(row)}
             phx-value-action_type={row_action_value(row)}
           >
             <span><%= row_action_label(row) %></span>
-            <span :if={row_action_context(row)} class="ax-visually-hidden"><%= " " <> row_action_context(row) %></span>
+            <span
+              :if={row_action_context(row)}
+              class="ax-visually-hidden"
+              aria-hidden="true"
+            ><%= " " <> row_action_context(row) %></span>
           </button>
         </dd>
       </div>

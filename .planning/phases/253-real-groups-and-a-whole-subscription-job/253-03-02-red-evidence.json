@@ -1,0 +1,10 @@
+{
+  "command": "node scripts/dev/phase252_lab.mjs exec --lane admin-test -- bash -c 'cd accrue_admin && PHASE252_TAP_REPORT=1 MIX_ENV=test mix run --no-start test/accrue_admin/dev/subscription_page_slice_test.exs > /private/tmp/phase253-03-02-red.tap 2>/private/tmp/phase253-03-02-red.stderr; result=$?; cat /private/tmp/phase253-03-02-red.tap; cat /private/tmp/phase253-03-02-red.stderr >&2; exit $result'",
+  "exitCode": 2,
+  "output": "TAP version 13\nnot ok 1 - AccrueAdmin.SubscriptionPageSliceTest::test the compiled page story declares supported review and result snapshots\nok 2 - AccrueAdmin.SubscriptionPageSliceTest::test the production owner exposes the shared whole subscription page renderer\nok 3 - AccrueAdmin.SubscriptionPageSliceTest::test canonical whole-page variations retain the active cancellation and incomplete facts\nok 4 - AccrueAdmin.SubscriptionPageSliceTest::test the active page variation is byte-identical to the production renderer and preserves its whole composition\n1..4\n",
+  "targetTest": "AccrueAdmin.SubscriptionPageSliceTest::test the compiled page story declares supported review and result snapshots",
+  "targetFile": "accrue_admin/test/accrue_admin/dev/subscription_page_slice_test.exs",
+  "expected": "The compiled page story declares the three canonical scenarios and six supported review/step-up/result snapshots.",
+  "actual": "The target assertion observed only the three canonical variations; review_cancel_now, awaiting_step_up, dispatching, and result states were not declared.",
+  "semanticAssessment": "The named target test executed and failed on the planned missing-variation assertion. The TAP report includes the complete four-test plan; the other three tests passed, with no fixture, setup, import, syntax, or unrelated failures."
+}

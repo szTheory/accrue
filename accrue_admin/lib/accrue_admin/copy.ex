@@ -1000,6 +1000,8 @@ defmodule AccrueAdmin.Copy do
 
   def subscription_action_recorded_info, do: "Subscription action recorded."
 
+  def subscription_action_activity_link_label, do: "Open scoped subscription activity"
+
   # --- Subscription drill (SubscriptionLive) — Phase 49, ADM-02
 
   def subscription_drill_related_card_title, do: "Related billing"

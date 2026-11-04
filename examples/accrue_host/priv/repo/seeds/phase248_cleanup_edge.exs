@@ -27,9 +27,27 @@ expected = [
 
 {:ok, :ok} =
   Repo.transaction(fn ->
+    locked_customers =
+      Repo.all(
+        from customer in Customer,
+          where: customer.processor_id == "cus_e2e_edge_1",
+          lock: "FOR UPDATE"
+      )
+
+    if length(locked_customers) > 1 do
+      raise "Phase 248 edge cleanup found a duplicate cus_e2e_edge_1"
+    end
+
+    locked_customer = List.first(locked_customers)
+
     rows =
       Enum.map(expected, fn {schema, processor_id} ->
-        matches = Repo.all(from row in schema, where: row.processor_id == ^processor_id)
+        matches =
+          if schema == Customer do
+            List.wrap(locked_customer)
+          else
+            Repo.all(from row in schema, where: row.processor_id == ^processor_id)
+          end
 
         if length(matches) > 1,
           do: raise("Phase 248 edge cleanup found a duplicate #{processor_id}")
@@ -43,13 +61,11 @@ expected = [
         {schema, processor_id, row}
       end)
 
-    customer =
-      rows
-      |> Enum.find(fn {_schema, id, _row} -> id == "cus_e2e_edge_1" end)
-      |> elem(2)
+    customer = locked_customer
 
     if customer &&
-         (customer.email != "edge-longname@example.test" or customer.owner_type != "User") do
+         (customer.email != "edge-longname@example.test" or customer.owner_type != "User" or
+            customer.owner_id != "314e6b2c-fd88-45b9-85b4-2623f3dc35aa") do
       raise "Phase 248 edge cleanup found an unexpected edge customer"
     end
 

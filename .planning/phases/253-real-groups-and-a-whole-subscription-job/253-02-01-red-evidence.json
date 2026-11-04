@@ -1,0 +1,10 @@
+{
+  "command": "node scripts/dev/phase252_lab.mjs exec --lane admin-test -- bash -c 'cd accrue_admin && PHASE252_TAP_REPORT=1 mix test test/accrue_admin/dev/subscription_collection_transport_test.exs > /private/tmp/phase253-02-01-red.tap 2>/private/tmp/phase253-02-01-red.stderr; result=$?; cat /private/tmp/phase253-02-01-red.tap; exit $result'",
+  "exitCode": 2,
+  "output": "TAP version 13\nok 1 - AccrueAdmin.Dev.SubscriptionCollectionTransportTest::test production route uses the scoped Subscriptions query despite query-module input\nnot ok 2 - AccrueAdmin.Dev.SubscriptionCollectionTransportTest::test the compiled collection story declares all supported settled states\nok 3 - AccrueAdmin.Dev.SubscriptionCollectionTransportTest::test the compiled one-row story mounts the connected production DataTable\nok 4 - AccrueAdmin.Dev.SubscriptionCollectionTransportTest::test compiled Storybook declares the production subscription collection path\n1..4",
+  "targetTest": "AccrueAdmin.Dev.SubscriptionCollectionTransportTest::test the compiled collection story declares all supported settled states",
+  "targetFile": "accrue_admin/test/accrue_admin/dev/subscription_collection_transport_test.exs",
+  "expected": "The compiled collection story declares all ten required variation IDs.",
+  "actual": "Only one_row is declared.",
+  "semanticAssessment": "The TAP reporter records the intended target assertion as the sole failing test; the three mounted transport controls passed. The full command stdout is preserved at /private/tmp/phase253-02-01-red.tap and non-report stderr at /private/tmp/phase253-02-01-red.stderr."
+}

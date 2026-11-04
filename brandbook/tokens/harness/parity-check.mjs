@@ -46,9 +46,12 @@ function buildScopes(css) {
   const root = postcss.parse(css);
   const scopes = {};
   root.walkRules(rule => {
-    const map = (scopes[rule.selector] ??= {});
+    // A selector LIST (`.psb-sandbox.accrue-admin, html.accrue-admin { ... }`) declares the
+    // same tokens in every listed scope, so each entry is keyed on its own; keying on the
+    // whole list string made a single-sourced light block invisible to the audit.
+    const maps = rule.selectors.map(selector => (scopes[selector] ??= {}));
     rule.walkDecls(/^--/, d => {
-      map[d.prop] = d.value;
+      for (const map of maps) map[d.prop] = d.value;
     });
   });
   return scopes;

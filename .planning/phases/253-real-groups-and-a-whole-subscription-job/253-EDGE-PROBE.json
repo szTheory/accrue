@@ -1,0 +1,122 @@
+{
+  "items": [
+    {
+      "requirement_id": "SBK-04",
+      "category": "boundary",
+      "status": "resolved",
+      "verification": "explicit",
+      "resolution": "Collection zero/one/multiple/page-boundary cases use actual cursor availability; no next_cursor omits Load more and failed next-page read retains existing rows.",
+      "reason": null,
+      "probe": "What happens exactly at each min/max/threshold — and one step either side?"
+    },
+    {
+      "requirement_id": "SBK-04",
+      "category": "adjacency",
+      "status": "resolved",
+      "verification": "explicit",
+      "resolution": "Adjacent cursor pages append stable unique rows in production order without duplicate boundary rows or scope leakage.",
+      "reason": null,
+      "probe": "When two things are exactly equal or just touch, do they merge, collide, or separate?"
+    },
+    {
+      "requirement_id": "SBK-04",
+      "category": "empty",
+      "status": "resolved",
+      "verification": "explicit",
+      "resolution": "First-run empty and filtered-empty collection cases show distinct production copy/recovery and no invented row.",
+      "reason": null,
+      "probe": "What is the result for empty, single-element, or null input?"
+    },
+    {
+      "requirement_id": "SBK-04",
+      "category": "ordering",
+      "status": "resolved",
+      "verification": "explicit",
+      "resolution": "Production collection controls, row order and load-more append order survive shared composition without reparenting DataTable events.",
+      "reason": null,
+      "probe": "When elements compare equal, is output order specified and stable?"
+    },
+    {
+      "requirement_id": "SBK-04",
+      "category": "precision",
+      "status": "resolved",
+      "verification": "explicit",
+      "resolution": "Collection amount values retain production currency/precision and unavailable semantics; no rounded guess substitutes for missing evidence.",
+      "reason": null,
+      "probe": "Where can precision loss, overflow, or rounding/tie-breaking occur — and what is the exact contract (e.g. half-up vs half-to-even, ceil/floor/truncate)?"
+    },
+    {
+      "requirement_id": "SBK-05",
+      "category": "unclassified",
+      "status": "unresolved",
+      "verification": null,
+      "resolution": null,
+      "reason": null,
+      "probe": "unclassified — review manually"
+    },
+    {
+      "requirement_id": "SBK-06",
+      "category": "adjacency",
+      "status": "resolved",
+      "verification": "explicit",
+      "resolution": "Changed actor, owner, target or reviewed record between staging and confirmation is revalidated and rejected without dispatch.",
+      "reason": null,
+      "probe": "When two things are exactly equal or just touch, do they merge, collide, or separate?"
+    },
+    {
+      "requirement_id": "SBK-06",
+      "category": "empty",
+      "status": "resolved",
+      "verification": "explicit",
+      "resolution": "Dismissed or missing staged review has zero dispatch/persisted effects and clears pending continuation.",
+      "reason": null,
+      "probe": "What is the result for empty, single-element, or null input?"
+    },
+    {
+      "requirement_id": "SBK-06",
+      "category": "ordering",
+      "status": "resolved",
+      "verification": "explicit",
+      "resolution": "Mounted journey follows list/detail/review/dismiss/restage/step-up/result/validated return and dispatches the exact target only after fresh authorization.",
+      "reason": null,
+      "probe": "When elements compare equal, is output order specified and stable?"
+    },
+    {
+      "requirement_id": "UXQ-01",
+      "category": "unclassified",
+      "status": "unresolved",
+      "verification": null,
+      "resolution": null,
+      "reason": null,
+      "probe": "unclassified — review manually"
+    },
+    {
+      "requirement_id": "UXQ-03",
+      "category": "empty",
+      "status": "resolved",
+      "verification": "explicit",
+      "resolution": "Empty, missing-evidence and failed-action messages come from current production Copy/domain owners and distinguish recovery outcomes.",
+      "reason": null,
+      "probe": "What is the result for empty, single-element, or null input?"
+    },
+    {
+      "requirement_id": "UXQ-03",
+      "category": "encoding",
+      "status": "resolved",
+      "verification": "explicit",
+      "resolution": "Long and markup-like synthetic identifiers/names render as text through production HEEx/copy owners and scoped destinations preserve validated encoded filter values.",
+      "reason": null,
+      "probe": "Whose definition of length/equality applies — bytes, code points, grapheme clusters, or normalized form?"
+    }
+  ],
+  "coverage": {
+    "applicable": 12,
+    "resolved": 10,
+    "unresolved": 2,
+    "unclassified": 2,
+    "byVerification": {
+      "explicit": 10,
+      "backstop": 0
+    }
+  }
+}

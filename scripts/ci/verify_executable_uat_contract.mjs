@@ -130,9 +130,9 @@ export function validateBackendZeroHumanPlan(source, file = "PLAN.md") {
 // `completed:` dates instead -- those are written once when a plan finishes
 // and do not change on a later verification re-run, so regenerating this
 // artifact is a fixed point (see scripts/ci/verify_artifact_fixed_point.mjs).
-// `completed:` lives at the frontmatter top level in some phases' SUMMARY
-// convention and nested under `metrics:` in others (e.g. phase 229) -- match
-// at any indentation rather than assuming one schema.
+// Completion dates use `completed:` or `completed_date:` at the frontmatter
+// top level in some summaries and under `metrics:` in others. Match either
+// spelling at any indentation rather than assuming one schema.
 function anyIndentScalar(metadata, key) {
   const match = metadata.match(new RegExp(`^\\s*${key}:\\s*["']?([^\\n"']+)["']?\\s*$`, "m"));
   return match?.[1]?.trim();
@@ -143,7 +143,7 @@ function summaryTimestamps(phaseDir, entries) {
   const dates = files.map((file) => {
     const source = fs.readFileSync(path.join(phaseDir, file), "utf8");
     const metadata = frontmatter(source, file);
-    const completed = anyIndentScalar(metadata, "completed");
+    const completed = anyIndentScalar(metadata, "completed") || anyIndentScalar(metadata, "completed_date");
     if (!completed) {
       fail(`${file}: completed date is required for deterministic UAT derivation (SUMMARY dates are outside VERIFICATION's covered set; verified: is not)`);
     }
@@ -726,6 +726,20 @@ try {
 }
 if (invokedAsEntrypoint && process.env.NODE_TEST_CONTEXT) {
   test("executable UAT contract self-test runs clean", () => selfTest());
+  test("UAT summary timestamps accept nested completed_date metadata", () => {
+    const temporaryRoot = fs.mkdtempSync(path.join(fs.realpathSync(os.tmpdir()), "executable-uat-summary-date-"));
+    const phaseDir = path.join(temporaryRoot, "253-summary-date-fixture");
+    fs.mkdirSync(phaseDir, { recursive: true });
+    try {
+      fs.writeFileSync(path.join(phaseDir, "253-01-SUMMARY.md"), "---\nstatus: complete\nmetrics:\n  completed_date: 2026-10-27\ncoverage:\n  - id: D1\n    description: A fixture deliverable\n    verification:\n      - kind: unit\n        ref: example.test.mjs#fixture\n        status: pass\n    human_judgment: false\n---\n");
+      fs.writeFileSync(path.join(phaseDir, "253-VERIFICATION.md"), "---\nstatus: passed\nbehavior_unverified: 0\n---\n");
+      const rendered = renderAutomatedUat(phaseDir);
+      assert.match(rendered, /started: 2026-10-27/);
+      assert.match(rendered, /updated: 2026-10-27/);
+    } finally {
+      fs.rmSync(temporaryRoot, { recursive: true, force: true });
+    }
+  });
 } else if (invokedAsEntrypoint) {
   try {
     main();

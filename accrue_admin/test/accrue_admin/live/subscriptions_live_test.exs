@@ -3,6 +3,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
 
   alias Accrue.Billing
   alias Accrue.Processor.Fake
+  alias Accrue.Repo
   alias Accrue.Test.Factory
   alias AccrueAdmin.Copy
 
@@ -335,6 +336,124 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     refute html =~ ~s(aria-busy="true")
   end
 
+  test "EDGE-SBK-04-boundary and adjacency preserve scoped equal-sort pages at 24, 25, and 26 rows" do
+    outside_owner_id = Ecto.UUID.generate()
+    inserted_at = ~U[2026-06-15 12:00:00.000000Z]
+
+    boundary_sets = [
+      {"phase253-minus-one", 24},
+      {"phase253-exact-limit", 25},
+      {"phase253-plus-one", 26}
+    ]
+
+    boundary_groups =
+      Enum.map(boundary_sets, fn {token, count} ->
+        owner_id = Ecto.UUID.generate()
+        org_slug = "phase253-boundary-#{System.unique_integer([:positive])}"
+
+        %{customer: customer} =
+          Factory.customer(%{
+            owner_type: "Organization",
+            owner_id: owner_id,
+            email: "#{token}@example.test"
+          })
+
+        name =
+          if token == "phase253-minus-one" do
+            "<script>phase253-hostile-name</script>"
+          else
+            "Boundary customer #{token}"
+          end
+
+        Repo.update!(Ecto.Changeset.change(customer, name: name))
+
+        subscriptions = create_boundary_subscriptions(customer, count, inserted_at)
+
+        %{
+          token: token,
+          count: count,
+          owner_id: owner_id,
+          org_slug: org_slug,
+          subscriptions: subscriptions
+        }
+      end)
+
+    %{subscription: foreign_subscription} =
+      Factory.active_subscription(%{
+        owner_type: "Organization",
+        owner_id: outside_owner_id,
+        email: "phase253-plus-one-foreign@example.test"
+      })
+
+    Repo.update!(Ecto.Changeset.change(foreign_subscription, inserted_at: inserted_at))
+
+    for %{
+          token: token,
+          count: count,
+          owner_id: owner_id,
+          org_slug: org_slug,
+          subscriptions: subscriptions
+        } <-
+          boundary_groups do
+      expected_ids =
+        subscriptions
+        |> Enum.map(&to_string(&1.id))
+        |> Enum.sort(:desc)
+
+      conn =
+        Phoenix.ConnTest.build_conn()
+        |> Phoenix.ConnTest.init_test_session(
+          admin_token: "admin",
+          active_organization_id: owner_id,
+          active_organization_slug: org_slug,
+          admin_organization_ids: [owner_id]
+        )
+
+      params = URI.encode_query(%{"org" => org_slug, "view" => "all", "q" => token})
+      assert {:ok, view, html} = live(conn, "/billing/subscriptions?" <> params)
+
+      first_page_ids = subscription_row_ids(html)
+      assert first_page_ids == Enum.take(expected_ids, 25)
+      refute to_string(foreign_subscription.id) in first_page_ids
+
+      [filter_form] = Floki.find(Floki.parse_document!(html), "form[data-role='filter-form']")
+      assert Floki.attribute(filter_form, "phx-target") == []
+
+      [search] = Floki.find(Floki.parse_document!(html), "input[name='q']")
+      assert Floki.attribute(search, "value") == [token]
+
+      if count <= 25 do
+        refute html =~ ~s(data-role="load-more")
+      else
+        [load_more] = Floki.find(Floki.parse_document!(html), "[data-role='load-more']")
+        assert [target] = Floki.attribute(load_more, "phx-target")
+        assert target != ""
+
+        completed_html = view |> element("[data-role='load-more']") |> render_click()
+        all_ids = subscription_row_ids(completed_html)
+
+        assert all_ids == expected_ids
+        assert length(Enum.uniq(all_ids)) == 26
+        refute completed_html =~ ~s(data-role="load-more")
+        assert completed_html =~ "End of list"
+
+        [search] = Floki.find(Floki.parse_document!(completed_html), "input[name='q']")
+        assert Floki.attribute(search, "value") == [token]
+
+        all_rows = Floki.find(Floki.parse_document!(completed_html), "tbody > tr[data-row-id]")
+        assert Enum.all?(all_rows, &(Floki.text(&1) =~ "Amount unavailable"))
+      end
+
+      if token == "phase253-minus-one" do
+        assert html =~ "&lt;script&gt;phase253-hostile-name&lt;/script&gt;"
+
+        refute Enum.any?(Floki.find(Floki.parse_document!(html), "script"), fn script ->
+                 Floki.text(script) =~ "phase253-hostile-name"
+               end)
+      end
+    end
+  end
+
   test "prioritizes identity, state, plan amount, time, and signals columns", %{conn: conn} do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
 
@@ -495,6 +614,25 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
 
   defp assert_one_h1(html) do
     assert html |> Floki.parse_document!() |> Floki.find("h1") |> length() == 1
+  end
+
+  defp create_boundary_subscriptions(customer, count, inserted_at) do
+    Enum.map(1..count, fn _index ->
+      {:ok, subscription} =
+        Billing.subscribe(customer, "price_basic",
+          trial_end: {:days, 14},
+          operation_id: Ecto.UUID.generate()
+        )
+
+      Repo.update!(Ecto.Changeset.change(subscription, inserted_at: inserted_at))
+    end)
+  end
+
+  defp subscription_row_ids(html) do
+    html
+    |> Floki.parse_document!()
+    |> Floki.find("tbody > tr[data-row-id]")
+    |> Enum.map(&(Floki.attribute(&1, "data-row-id") |> hd()))
   end
 
   defp assert_table_headings_in_order(html, labels) do

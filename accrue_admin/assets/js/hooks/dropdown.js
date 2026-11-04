@@ -27,6 +27,31 @@ function resetDropdownPosition(details) {
   panel.style.removeProperty("--ax-dropdown-max-height");
 }
 
+// The panel's horizontal offset is a CSS-transitioned `translate(var(--ax-dropdown-shift-x))`.
+// getBoundingClientRect() includes the *in-flight* transform, so measuring right after the
+// shift variable changes reads a position part-way between the old and new shift. Read the
+// live translateX instead and subtract it, which yields the untransformed (natural) box no
+// matter where the transition currently is.
+function liveShiftX(panel) {
+  const transform = globalThis.window?.getComputedStyle?.(panel)?.transform;
+  if (!transform || transform === "none") return 0;
+
+  const matrix = new globalThis.DOMMatrixReadOnly(transform);
+  return Number.isFinite(matrix.m41) ? matrix.m41 : 0;
+}
+
+function naturalRect(panel) {
+  const rect = panel.getBoundingClientRect();
+  const shift = liveShiftX(panel);
+
+  return {
+    left: rect.left - shift,
+    right: rect.right - shift,
+    width: rect.width,
+    height: rect.height
+  };
+}
+
 function dropdownViewport() {
   const fallback = globalThis.document?.documentElement;
 
@@ -46,11 +71,9 @@ function positionDropdown(details) {
   const panel = details.querySelector(PANEL_SELECTOR);
   if (!summary?.getBoundingClientRect || !panel?.getBoundingClientRect || !panel.style) return;
 
-  panel.style.removeProperty("--ax-dropdown-shift-x");
-
   const viewport = dropdownViewport();
   const triggerRect = summary.getBoundingClientRect();
-  const naturalPanelRect = panel.getBoundingClientRect();
+  const naturalPanelRect = naturalRect(panel);
   const spaceBelow = viewport.height - triggerRect.bottom - VIEWPORT_MARGIN - PANEL_GAP;
   const spaceAbove = triggerRect.top - VIEWPORT_MARGIN - PANEL_GAP;
   const shouldPlaceAbove =
@@ -62,7 +85,7 @@ function positionDropdown(details) {
   if (details.dataset) details.dataset.floatingPlacement = placement;
   panel.style.setProperty("--ax-dropdown-max-height", cssPx(availableHeight));
 
-  const placedPanelRect = panel.getBoundingClientRect();
+  const placedPanelRect = naturalRect(panel);
   let shiftX = 0;
 
   if (placedPanelRect.left < VIEWPORT_MARGIN) {

@@ -1,0 +1,102 @@
+{
+  "commit": "073e33792d7fd55810f7afd12908ff247caca206",
+  "spec_path": "accrue_admin/e2e/subscription-design-phase254.spec.js",
+  "spec_sha256": "4722ae25d8c8923c8154d4c256945dfc4cf51f3c30165129eefc35f018e1c431",
+  "commands": [
+    {
+      "command": "PLAYWRIGHT_JSON_OUTPUT_FILE=\"$PWD/accrue_admin/tmp/phase254/design-red.json\" node scripts/dev/phase252_lab.mjs browser -- e2e/subscription-design-phase254.spec.js --reporter=json",
+      "exit_code": 1
+    }
+  ],
+  "expect_fail": [
+    "DR-254-01:computed",
+    "DR-254-02:source",
+    "DR-254-03:computed"
+  ],
+  "expect_pass": [
+    "DR-254-02:computed"
+  ],
+  "failures": [
+    {
+      "test": "DR-254-01:computed detail stacks and field lists use component spacing tokens at 320px light",
+      "key": "DR-254-01:computed",
+      "finding_id": "DR-254-01",
+      "expected": "16px",
+      "actual": "3px"
+    },
+    {
+      "test": "DR-254-01:computed detail stacks and field lists use component spacing tokens at 320px dark",
+      "key": "DR-254-01:computed",
+      "finding_id": "DR-254-01",
+      "expected": "16px",
+      "actual": "3px"
+    },
+    {
+      "test": "DR-254-01:computed detail stacks and field lists use component spacing tokens at 1280px light",
+      "key": "DR-254-01:computed",
+      "finding_id": "DR-254-01",
+      "expected": "16px",
+      "actual": "3px"
+    },
+    {
+      "test": "DR-254-01:computed detail stacks and field lists use component spacing tokens at 1280px dark",
+      "key": "DR-254-01:computed",
+      "finding_id": "DR-254-01",
+      "expected": "16px",
+      "actual": "3px"
+    },
+    {
+      "test": "DR-254-03:computed detail field labels equal summary keys, form labels and value figures are unchanged at 320px light",
+      "key": "DR-254-03:computed",
+      "finding_id": "DR-254-03",
+      "expected": "12px",
+      "actual": "14px"
+    },
+    {
+      "test": "DR-254-03:computed detail field labels equal summary keys, form labels and value figures are unchanged at 320px dark",
+      "key": "DR-254-03:computed",
+      "finding_id": "DR-254-03",
+      "expected": "12px",
+      "actual": "14px"
+    },
+    {
+      "test": "DR-254-03:computed detail field labels equal summary keys, form labels and value figures are unchanged at 1280px light",
+      "key": "DR-254-03:computed",
+      "finding_id": "DR-254-03",
+      "expected": "12px",
+      "actual": "14px"
+    },
+    {
+      "test": "DR-254-03:computed detail field labels equal summary keys, form labels and value figures are unchanged at 1280px dark",
+      "key": "DR-254-03:computed",
+      "finding_id": "DR-254-03",
+      "expected": "12px",
+      "actual": "14px"
+    },
+    {
+      "test": "DR-254-02:source declared display font-size is var(--ax-type-xl) and var(--ax-type-2xl) in the served accrue_admin.css",
+      "key": "DR-254-02:source",
+      "finding_id": "DR-254-02",
+      "expected": "var(--ax-type-xl)",
+      "actual": "1.5rem"
+    }
+  ],
+  "passed": [
+    {
+      "test": "DR-254-02:computed collection heading is --ax-type-xl at 767px light",
+      "key": "DR-254-02:computed"
+    },
+    {
+      "test": "DR-254-02:computed collection heading is --ax-type-xl at 767px dark",
+      "key": "DR-254-02:computed"
+    },
+    {
+      "test": "DR-254-02:computed collection heading is --ax-type-2xl at 768px light",
+      "key": "DR-254-02:computed"
+    },
+    {
+      "test": "DR-254-02:computed collection heading is --ax-type-2xl at 768px dark",
+      "key": "DR-254-02:computed"
+    }
+  ]
+}

@@ -33,8 +33,11 @@ defmodule AccrueAdmin.Dev.StorybookAssetTest do
 
     assert AccrueAdmin.Assets.hashed_path(:storybook_css, "/dev/storybook") in dev_paths
     assert AccrueAdmin.Assets.hashed_path(:storybook_js, "/dev/storybook") in dev_paths
+    assert "/billing/dev/components" in dev_paths
+    assert "/ops/subscriptions" in prod_paths
 
     refute Enum.any?(prod_paths, &String.contains?(&1, "/dev/storybook"))
+    refute Enum.any?(prod_paths, &String.contains?(&1, "/dev/components"))
   end
 
   test "phoenix_storybook remains scoped to dev and test in the package dependency list" do

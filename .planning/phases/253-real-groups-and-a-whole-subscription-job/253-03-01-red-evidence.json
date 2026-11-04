@@ -1,0 +1,10 @@
+{
+  "command": "node scripts/dev/phase252_lab.mjs exec --lane admin-test -- bash -c 'cd accrue_admin && MIX_ENV=test mix run --no-start test/accrue_admin/dev/subscription_page_slice_test.exs > /private/tmp/phase253-03-01-red.tap 2>/private/tmp/phase253-03-01-red.stderr; result=$?; cat /private/tmp/phase253-03-01-red.tap; cat /private/tmp/phase253-03-01-red.stderr >&2; exit $result'",
+  "exitCode": 2,
+  "output": "TAP version 13\nnot ok 1 - AccrueAdmin.SubscriptionPageSliceTest::test the production owner exposes the shared whole subscription page renderer\n1..1\n",
+  "targetTest": "AccrueAdmin.SubscriptionPageSliceTest::test the production owner exposes the shared whole subscription page renderer",
+  "targetFile": "accrue_admin/test/accrue_admin/dev/subscription_page_slice_test.exs",
+  "expected": "SubscriptionLive exposes the whole-page production renderer needed by the page story.",
+  "actual": "The target assertion failed because function_exported?(SubscriptionLive, :subscription_page, 1) returned false.",
+  "semanticAssessment": "The named target test executed and failed on the planned missing-renderer assertion. The TAP report contains one target failure and a valid one-test plan; there were no fixture, setup, import, syntax, or unrelated failures."
+}

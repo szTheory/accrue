@@ -1,0 +1,11 @@
+{
+  "command": "node --test --test-name-pattern=\"a failed phase command stops the gate and cannot produce passing evidence\" --test-reporter=tap scripts/ci/verify_phase252_ci_contract.test.mjs",
+  "cwd": "/private/tmp/accrue-252-08-02-sequence-red.96FeQD",
+  "exitCode": 1,
+  "output": "TAP version 13\n# Subtest: a failed phase command stops the gate and cannot produce passing evidence\nnot ok 1 - a failed phase command stops the gate and cannot produce passing evidence\n  ---\n  duration_ms: 1.546792\n  location: '/private/tmp/accrue-252-08-02-sequence-red.96FeQD/scripts/ci/verify_phase252_ci_contract.test.mjs:115:1'\n  failureType: 'testCodeFailure'\n  error: |-\n    Expected values to be strictly deep-equal:\n    + actual - expected\n    \n      [\n        'failing-lane',\n    +   'must-not-run'\n      ]\n    \n  code: 'ERR_ASSERTION'\n  name: 'AssertionError'\n  expected:\n    0: 'failing-lane'\n  actual:\n    0: 'failing-lane'\n    1: 'must-not-run'\n  operator: 'deepStrictEqual'\n  stack: |-\n    TestContext.<anonymous> (file:///private/tmp/accrue-252-08-02-sequence-red.96FeQD/scripts/ci/verify_phase252_ci_contract.test.mjs:126:10)\n    async Test.run (node:internal/test_runner/test:980:9)\n    async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)\n  ...\n1..1\n# tests 1\n# suites 0\n# pass 0\n# fail 1\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 55.084\n",
+  "targetTest": "a failed phase command stops the gate and cannot produce passing evidence",
+  "targetFile": "scripts/ci/verify_phase252_ci_contract.test.mjs",
+  "expected": "execution stops after the first nonzero lane, writes failed evidence, and never writes a passing status",
+  "actual": "the scaffold ran the later lane after the first command returned exitCode 1",
+  "semanticAssessment": "The target assertion executed and failed because the sequence continued after a genuine injected nonzero command result; no imports or fixtures failed."
+}

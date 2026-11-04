@@ -80,6 +80,39 @@ defmodule AccrueAdmin.OverlayComponentsTest do
       assert html =~ ~s(data-focus-trap-fallback="#subscription-step-up-title")
     end
 
+    # Phase 254 A11Y-254-27: the drawer body scrolls on its own, so it is a labelled, keyboard
+    # focusable region (axe scrollable-region-focusable). The modal and popover bodies do not scroll
+    # independently and keep plain markup.
+    test "makes the independently scrolling drawer body a labelled focusable region" do
+      render = fn presentation ->
+        render_component(
+          fn assigns ->
+            assigns = assign(assigns, :presentation, presentation)
+
+            ~H"""
+            <Overlay.overlay id="body-probe" open presentation={@presentation} title="Probe">
+              <button type="button">Save change</button>
+            </Overlay.overlay>
+            """
+          end,
+          %{}
+        )
+      end
+
+      drawer = render.(:drawer)
+      assert drawer =~ ~r/<div class="ax-detail-drawer-body"[^>]*tabindex="0"/
+      assert drawer =~ ~r/<div class="ax-detail-drawer-body"[^>]*role="region"/
+
+      assert drawer =~
+               ~r/<div class="ax-detail-drawer-body"[^>]*aria-labelledby="body-probe-title"/
+
+      for presentation <- [:modal, :popover] do
+        html = render.(presentation)
+        refute html =~ ~s(tabindex="0")
+        refute html =~ ~s(role="region")
+      end
+    end
+
     test "renders popover presentation without modal semantics" do
       html =
         render_component(fn assigns ->
@@ -94,7 +127,7 @@ defmodule AccrueAdmin.OverlayComponentsTest do
             close_label="Close actions"
             close_event="close_subscription_actions"
           >
-            <button type="button" role="menuitem">Pause collection</button>
+            <button type="button">Pause collection</button>
           </Overlay.overlay>
           """
         end)
@@ -103,7 +136,8 @@ defmodule AccrueAdmin.OverlayComponentsTest do
       assert html =~ ~s(data-presentation="popover")
       assert html =~ ~s(data-ax-overlay-shell)
       assert html =~ ~s(data-ax-overlay-panel)
-      assert html =~ ~s(role="menu")
+      assert html =~ ~s(role="dialog")
+      refute html =~ ~s(role="menu")
       assert html =~ ~s(phx-hook="Overlay")
       refute html =~ ~s(aria-modal="true")
       refute html =~ ~s(data-scroll-lock)
@@ -190,12 +224,15 @@ defmodule AccrueAdmin.OverlayComponentsTest do
       assert html =~ ~s(phx-target="#subscription-live")
       assert html =~ ~s(phx-value-action_type="swap_plan")
       assert html =~ ~s(<span>Change</span>)
-      assert html =~ ~s(<span class="ax-visually-hidden"> for subscription sub_123</span>)
+
+      assert html =~
+               ~s(<span class="ax-visually-hidden" aria-hidden="true"> for subscription sub_123</span>)
+
       assert html =~ ~s(href="#dunning-recovery")
       assert html =~ ~s(<span>View</span>)
 
       assert html =~
-               ~s(<span class="ax-visually-hidden"> dunning activity for subscription sub_123</span>)
+               ~s(<span class="ax-visually-hidden" aria-hidden="true"> dunning activity for subscription sub_123</span>)
     end
 
     test "renders summary-list row context from hidden_context and context aliases" do
@@ -225,10 +262,10 @@ defmodule AccrueAdmin.OverlayComponentsTest do
         end)
 
       assert html =~
-               ~s(<span class="ax-visually-hidden"> default payment method for customer cus_123</span>)
+               ~s(<span class="ax-visually-hidden" aria-hidden="true"> default payment method for customer cus_123</span>)
 
       assert html =~
-               ~s(<span class="ax-visually-hidden"> invoice INV-1024 for customer cus_123</span>)
+               ~s(<span class="ax-visually-hidden" aria-hidden="true"> invoice INV-1024 for customer cus_123</span>)
     end
 
     test "keeps detail_field_list available for read-only drill groups" do

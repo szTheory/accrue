@@ -1,0 +1,10 @@
+{
+  "command": "node --test --test-reporter=tap /private/tmp/phase252-red-N9lSrW/scripts/ci/verify_phase252_lab_presentation.test.mjs",
+  "exitCode": 1,
+  "output": "TAP version 13\n# Subtest: lab presentation states disposable static limits\nnot ok 1 - lab presentation states disposable static limits\n  ---\n  duration_ms: 0.581\n  location: '/private/tmp/phase252-red-N9lSrW/scripts/ci/verify_phase252_lab_presentation.test.mjs:5:1'\n  failureType: 'testCodeFailure'\n  error: 'guide must identify a disposable non-production review lab'\n  code: 'ERR_ASSERTION'\n  name: 'AssertionError'\n  expected: true\n  actual: false\n  operator: '=='\n  stack: |-\n    TestContext.<anonymous> (file:///private/tmp/phase252-red-N9lSrW/scripts/ci/verify_phase252_lab_presentation.test.mjs:7:10)\n    Test.runInAsyncScope (node:async_hooks:211:14)\n    Test.run (node:internal/test_runner/test:979:25)\n    Test.start (node:internal/test_runner/test:877:17)\n    startSubtestAfterBootstrap (node:internal/test_runner/harness:296:17)\n  ...\n1..1\n# tests 1\n# suites 0\n# pass 0\n# fail 1\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 31.589292\n",
+  "targetTest": "lab presentation states disposable static limits",
+  "targetFile": "scripts/ci/verify_phase252_lab_presentation.test.mjs",
+  "expected": "The guide identifies the review lab as disposable and non-production.",
+  "actual": "The named content assertion failed because that attribution is absent.",
+  "semanticAssessment": "The test and guide were copied byte-for-byte to an isolated temporary tree to keep machine-home paths out of committed evidence. SHA-256 matches: test=1c0d9f9e085975ea7f80108ffcb94d65a1a852d48935c6e61d2d56ea55eca47f, guide=a0bcf7506624c7ee2bd57fdf5313348ea68de4a6499ae021fa94c637c2cd0194. The named assertion loaded and failed on the intended guide-content check; complete TAP report retained."
+}

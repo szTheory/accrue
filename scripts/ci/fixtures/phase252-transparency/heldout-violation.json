@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "guide": {
+    "source": "guides/ui-story-lab.md",
+    "text": "Ordinary and held-out subscription facts are synthetic stress scenarios, not representative customer behavior or real adopter usage evidence. The long-text browser clone is a separate synthetic stress input, distinct from the manifest fixture entries and the CadenceSubscriptionFacts.held_out!/1 source. This disposable, non-production review lab presents a static review surface. Rendered controls do not establish completed billing actions. Static rendering verifies story state and visual/semantic output. It does not prove mounted authorization, provider completion, dispatched action behavior, or persistence. The held-out stress input represents typical customer behavior."
+  },
+  "story": {
+    "source": "storybook/components/subscription_detail.story.exs",
+    "moduledoc": "Every variation is a static render of deterministic scenario facts. It does not establish mounted authorization, provider completion, persistence, or action success."
+  },
+  "manifest": {
+    "source": "storybook/phase252-manifest.json",
+    "entries": [
+      {
+        "key": "/components/subscription_detail||active",
+        "actor": "vendor billing support operator",
+        "job": "understand subscription state and choose a supported next action",
+        "input_source": "deterministic Cadence scenario facts",
+        "production_renderer": "AccrueAdmin.Live.SubscriptionLive.subscription_area/1",
+        "proof_lane": "static render"
+      }
+    ]
+  },
+  "held_out": {
+    "source": "dev_support/ui_scenarios/cadence_subscriptions.exs",
+    "documentation": "Returns separately labelled held-out text stress input, never an ordinary variation.",
+    "function_block": "def held_out!(:long_text) do\n  |> Map.put(:lane, :held_out)\n  |> Map.put(:held_out_case, :long_text)\nend",
+    "lane": "held_out",
+    "case": "long_text"
+  },
+  "ordinary": {
+    "source": "accrue_admin/storybook/_support/subscription_scenarios.ex",
+    "validation_block": "defp validate_scenario(%{lane: :ordinary, scenario: scenario}) do\n  CadenceSubscriptionFacts.list()\n  {:error, \"scenario must be a declared ordinary Cadence fact\"}\nend\ndefp validate_scenario(_facts), do: {:error, \"scenario must declare the ordinary review lane\"}",
+    "lane": "ordinary",
+    "refusal": "scenario must declare the ordinary review lane"
+  },
+  "browser_evidence": {
+    "source": "accrue_admin/e2e/phase252-story-helpers.js",
+    "function_name": "assertHeldOutLongText",
+    "function_block": "return { theme, label: \"held-out long text (not manifest fixture)\" };",
+    "label": "held-out long text (not manifest fixture)"
+  }
+}

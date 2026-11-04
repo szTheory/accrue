@@ -1,0 +1,15 @@
+{
+  "command": "node --test --test-reporter=tap --test-name-pattern='interrupted launcher stops descendants before database teardown and preserves unrelated processes' scripts/dev/phase252_isolation.test.mjs",
+  "exitCode": 1,
+  "output": "TAP version 13\n# Subtest: interrupted launcher stops descendants before database teardown and preserves unrelated processes\nnot ok 1 - interrupted launcher stops descendants before database teardown and preserves unrelated processes\n  ---\n  duration_ms: 776.170667\n  type: 'test'\n  location: '/private/tmp/phase252-tdd-red-2JVFGR/scripts/dev/phase252_isolation.test.mjs:284:1'\n  failureType: 'testCodeFailure'\n  error: |-\n    database teardown must wait until the owned grandchild is no longer running\n    \n    true !== false\n    \n  code: 'ERR_ASSERTION'\n  name: 'AssertionError'\n  expected: false\n  actual: true\n  operator: 'strictEqual'\n  stack: |-\n    TestContext.<anonymous> (file:///private/tmp/phase252-tdd-red-2JVFGR/scripts/dev/phase252_isolation.test.mjs:381:12)\n    process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    async Test.run (node:internal/test_runner/test:1409:7)\n    async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3)\n  ...\n1..1\n# tests 1\n# suites 0\n# pass 0\n# fail 1\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 15268.227625\n",
+  "targetTest": "interrupted launcher stops descendants before database teardown and preserves unrelated processes",
+  "targetFile": "scripts/dev/phase252_isolation.test.mjs",
+  "expected": "The guarded launcher must terminate the owned grandchild and wait for its completion before dropping the launcher's exact disposable database.",
+  "actual": "The named target test executed and failed at the cleanup-order assertion: the disposable database was dropped while the grandchild process was still alive.",
+  "semanticAssessment": "The named TAP subtest executed and failed on its planned behavior assertion. It launched the real Phase 252 CLI with a synthetic child and grandchild, sent SIGTERM to the guarded launcher, and observed the exact disposable database disappear while the owned grandchild remained alive. The failure is not a syntax, fixture, setup, or discovery error.",
+  "executionRoot": "private temporary mirror",
+  "mirrorSha256": {
+    "scripts/dev/phase252_lab.mjs": "4fe9b16a7ead0b6fb374c252270d2ec74225cf3cc48edf5e5ea4a13c9d3ab8e4",
+    "scripts/dev/phase252_isolation.test.mjs": "39755c6746bf0ae7e62f89d7993f0339bff6c5261bc974ecc2b636ef9d7b3a34"
+  }
+}

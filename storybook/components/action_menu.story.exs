@@ -31,15 +31,6 @@ defmodule AccrueAdmin.Storybook.Components.ActionMenu do
           attributes: %{story_id: "danger", state: :open, groups: danger_groups()}
         },
         %Variation{
-          id: :provider_pruned,
-          description: "Provider-pruned Braintree action set",
-          attributes: %{
-            story_id: "provider-pruned",
-            state: :open,
-            groups: provider_pruned_groups()
-          }
-        },
-        %Variation{
           id: :focus,
           description: "Keyboard focus on trigger",
           attributes: %{story_id: "focus", state: :focus, groups: full_groups()}
@@ -122,19 +113,6 @@ defmodule AccrueAdmin.Storybook.Components.ActionMenu do
         items: [
           action_item("Cancel immediately", "cancel_now", "Ends service now", danger?: true),
           action_item("Comp this subscription", "comp_subscription", "Creates a replacement",
-            danger?: true
-          )
-        ]
-      }
-    ]
-  end
-
-  defp provider_pruned_groups do
-    [
-      %{
-        label: "Danger zone",
-        items: [
-          action_item("Cancel immediately", "cancel_now", "Stripe-only path hidden in this story",
             danger?: true
           )
         ]

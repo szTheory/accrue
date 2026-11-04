@@ -1,0 +1,10 @@
+{
+  "command": "node scripts/dev/phase252_lab.mjs exec --lane admin-test --partition 9252100411 -- sh -c 'cd accrue_admin && mix test --no-color --formatter AccrueAdmin.Test.Phase252TapFormatter test/accrue_admin/dev/subscription_scenario_repo_test.exs 1> /private/tmp/phase252-04-01-red.stdout 2> /private/tmp/phase252-04-01-red.tap; exit $?'",
+  "exitCode": 2,
+  "targetTest": "test persists launch and growing-team source facts and reloads their exact linked rows",
+  "targetFile": "subscription_scenario_repo_test.exs",
+  "expected": "The test persists validated launch and growing-team facts through a Repo adapter and reloads rows whose identities, fields, and associations match the source facts.",
+  "actual": "The targeted test reached the explicit adapter-availability assertion and failed because AccrueAdmin.Test.SubscriptionScenarioRepo had not yet been implemented.",
+  "output": "TAP version 13\nnot ok 1 - test replay is stable and conflicting source or processor identities are refused\nnot ok 2 - test migrated Postgres rejects invalid foreign keys, null relationships, and duplicate provider references\nnot ok 3 - test rolls back a failed middle insert and serializes competing inserts without duplicate rows\nnot ok 4 - test persists launch and growing-team source facts and reloads their exact linked rows\n1..4\n",
+  "semanticAssessment": "Accepted as RED: the complete TAP report records the named target as executed and failed. The direct assertion requires the missing Repo adapter API before any persistence claims can pass; the test setup separately checked that the run was inside the fresh launcher-owned admin-test database with the expected role and loopback address. The original Mix stdout, including logger output, was preserved separately in a private temporary file. The earlier default ExUnit report for this same target identified the failure as the explicit adapter-availability assertion, with no setup or DB identity failure."
+}

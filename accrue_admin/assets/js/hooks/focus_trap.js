@@ -24,12 +24,24 @@ function focusWithoutScroll(node) {
   return true;
 }
 
-function restoreFocusAfterPatch(node, { requireFocusable = false } = {}) {
+// Focus is "lost" when nothing meaningful holds it: the document body, a node that left the page,
+// a node inside the overlay that just closed, or the page container the overlay hook parks focus on.
+// A control the user has already moved to is not lost, and the delayed return must not take it.
+function focusIsLost(overlayElement) {
+  const active = document.activeElement;
+  if (!active || active === document.body || active === document.documentElement) return true;
+  if (!isConnected(active)) return true;
+  if (overlayElement?.contains?.(active)) return true;
+  return active.id === "main-content" || active.localName === "main";
+}
+
+function restoreFocusAfterPatch(node, { requireFocusable = false, onlyIfFocusLostFrom = null } = {}) {
   if (!node || typeof node.focus !== "function") return false;
 
   const restore = () => {
     if (!isConnected(node) || !isVisibleForFocus(node)) return;
-    if (requireFocusable && !isFocusable(node)) return;
+    if (requireFocusable && !canReceiveReturnFocus(node)) return;
+    if (onlyIfFocusLostFrom && !focusIsLost(onlyIfFocusLostFrom)) return;
     focusWithoutScroll(node);
   };
 
@@ -53,8 +65,34 @@ function isFocusable(node) {
   return typeof node.matches !== "function" || node.matches(FOCUSABLE_SELECTOR);
 }
 
+// A disclosure trigger (<details><summary>) is natively focusable but is not in FOCUSABLE_SELECTOR,
+// which lists what the trap cycles through. It is still a valid place to return focus to: it is the
+// menu button that owns an action menu (WAI-ARIA menu-button pattern).
+function isDisclosureTrigger(node) {
+  return (
+    node?.localName === "summary" &&
+    node.parentElement?.localName === "details" &&
+    isConnected(node) &&
+    !isHidden(node)
+  );
+}
+
+function canReceiveReturnFocus(node) {
+  return (isFocusable(node) || isDisclosureTrigger(node)) && isVisibleForFocus(node);
+}
+
+// The content of a closed <details> (everything but its <summary>) keeps a box but cannot take
+// focus, so it is not a place to return focus to.
+function insideClosedDisclosure(node) {
+  const closed = node?.parentElement?.closest?.("details:not([open])");
+  if (!closed) return false;
+  const summary = closed.querySelector?.(":scope > summary");
+  return !(summary && summary.contains?.(node));
+}
+
 function isVisibleForFocus(node) {
   if (!node) return false;
+  if (insideClosedDisclosure(node)) return false;
   if (typeof window === "undefined") return true;
 
   const style = window.getComputedStyle?.(node);
@@ -193,27 +231,32 @@ export const FocusTrap = {
 
     const returnSelector = this.el?.dataset?.focusTrapReturnTo;
     const returnTarget = returnSelector ? document.querySelector(returnSelector) : null;
-    if (
-      isFocusable(returnTarget) &&
-      isVisibleForFocus(returnTarget) &&
-      typeof returnTarget.focus === "function"
-    ) {
-      restoreFocusAfterPatch(returnTarget, { requireFocusable: true });
+    if (canReceiveReturnFocus(returnTarget) && typeof returnTarget.focus === "function") {
+      restoreFocusAfterPatch(returnTarget, { requireFocusable: true, onlyIfFocusLostFrom: this.el });
       return;
     }
 
-    if (isFocusable(previous) && isVisibleForFocus(previous) && typeof previous.focus === "function") {
-      restoreFocusAfterPatch(previous, { requireFocusable: true });
+    if (canReceiveReturnFocus(previous) && typeof previous.focus === "function") {
+      restoreFocusAfterPatch(previous, { requireFocusable: true, onlyIfFocusLostFrom: this.el });
       return;
     }
 
+    // The control that opened the overlay sat in a menu that has since closed (Escape closes the
+    // menu and the overlay together): return to the menu button that owns it.
+    const menuButton = previous?.closest?.("details")?.querySelector?.(":scope > summary");
+    if (canReceiveReturnFocus(menuButton) && typeof menuButton.focus === "function") {
+      restoreFocusAfterPatch(menuButton, { requireFocusable: true, onlyIfFocusLostFrom: this.el });
+      return;
+    }
+
+    const lostOnly = { onlyIfFocusLostFrom: this.el };
     const fallback = this.fallbackFocusTarget();
-    if (fallback && !this.el.contains?.(fallback) && restoreFocusAfterPatch(fallback)) return;
+    if (fallback && !this.el.contains?.(fallback) && restoreFocusAfterPatch(fallback, lostOnly)) return;
 
     const pageFallback = document.querySelector?.("#main-content, main");
-    if (restoreFocusAfterPatch(pageFallback)) return;
+    if (restoreFocusAfterPatch(pageFallback, lostOnly)) return;
 
-    restoreFocusAfterPatch(fallback);
+    restoreFocusAfterPatch(fallback, lostOnly);
   },
 
   handleFocusTrapKeydown(event) {

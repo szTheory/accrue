@@ -49,15 +49,36 @@ v1.49 **Realistic Demo App & Adoption Evidence** shipped on **2026-06-02**. The 
 
 **Post-archive tooling:** Canonical archive lookup now keeps recorded proof commands usable. Fresh 27 Node controls and both validators pass; this is tooling evidence, not a new phase-level verification verdict. See [archive compatibility](milestones/v1.66-ARCHIVE-COMPATIBILITY.md).
 
-## Next Milestone Goals
+## Current Milestone: v1.68 UI Storybook Stress Testing
 
-No milestone is open. The candidates for v1.68 are in `milestones/v1.67-REQUIREMENTS.md`, Future Requirements:
-- **HIGH:** the `accrue_events.inserted_at` session-timezone fix (needs a migration or app-side timestamps).
-- Extend the `_build` cache to host-integration, browser-uat and the admin jobs.
-- The 250 CI helper should read the provider-proof classifier's `should_run` output.
-- The smaller items deferred from v1.66.
+**Goal:** Make the existing subscription job inspectable and improvable through production-backed compositions, realistic scenarios and repeatable mobile/light/dark quality checks, then expand the demonstrated method across the UI.
 
-Open a milestone only on a concrete trigger (Planning Doctrine).
+**Authority:** On 2026-10-26 the owner identified compositional Storybook coverage as the next major UI quality opportunity, requested and received a bounded multi-role research/adversarial review, then approved the recommended three-phase proposal with “what do u rec? do that”. This explicit strategy decision reopens quality work on existing surfaces under the stable-core posture. It authorizes derived requirements, routine implementation choices and the recommended roadmap without repeated confirmation of the same scope.
+
+**Target features:**
+- Components → small groups → areas → sections → whole pages per job, starting with finding, understanding and safely acting on a subscription. Stories call production rendering and copy/eligibility/link owners; metadata or copied page markup cannot stand in for composition coverage.
+- Shared deterministic launch/team scenario facts and narrow story/test/seed adapters, with domain and persisted-conformance checks, explicit actor/billable/provider identities, and preserved ordinary/held-out fixture safety.
+- A variation-aware reachable-situation manifest, real toolbar/table and full subscription-page examples, and mounted acceptance for authorization, queries, patches, lifecycle, actions and truthful outcomes.
+- Mobile-first real/container/breakpoint-width coverage, both themes, professional typography, restrained colors, clear hierarchy, coherent journeys, consistent user-facing domain language and power-user depth. Bounded rendered review complements mechanical checks; baseline stability alone is not design excellence.
+- Safe isolated local lab launch, dev/test-only scenario packaging, first-slice CI trigger coverage, conservative consumer selection, selected visual regression, measured cost and evidence-backed scenario pruning.
+
+**Evidence and decisions:** [owner direction](notes/2026-10-26-ui-storybook-quality-direction.md), [research recommendations](research/ui-quality-engine/RECOMMENDATIONS.md), [approved scope and rolling roadmap](research/ui-quality-engine/MILESTONE-PROPOSAL.md), [adversarial review](research/ui-quality-engine/ADVERSARIAL-REVIEW.md). Research commit `ed4a9d68`. Existing group stories render metadata rather than described groups, and the subscription story copies an older screen; these source-backed process gaps justify the first slice without inventing current runtime UI defects.
+
+**Boundaries:** Existing subscription job first; no new billing capability, provider parity, Admin room, rebrand, broad page rewrite, dependency campaign or parked paid-critic revival. Retain the component kitchen's independent test purpose and existing token ownership. Keep DataTable/stateful lifecycle where it belongs; static stories do not prove authority or money movement. Preserve host policy, exact scope, technical evidence, current canonical-host mounts and local milestone tags. Story rendering may be DB-free while the reused lab bootstrap is DB-backed: isolate its disposable DB/port/process from reset-capable test runs and prove that separation. No weakening gates, silent rebaselines, fixture sprawl or all-prop Cartesian product.
+
+**Review/automation:** One assessment, one correction batch and one confirmation per coherent slice unless a named defect warrants reopening. Deterministic acceptance stays automated; owner taste is optional, not recurring manual UAT. Carry the known CI path-admission gap and review-server isolation findings into Phase 252. Measure startup separately from warm rendering before freezing preview/CI budgets. Prefer existing maintained tooling and small local helpers; justify any necessary dependency explicitly.
+
+**Selected seed context:** SEED-009 supplies the current proposal; SEED-004 supplies delivered M1 hierarchy/operator-clarity guardrails only, without M2/M3 expansion; SEED-003 supplies bounded prerequisite hygiene only. Seed files remain unchanged.
+
+**Sequence:** Phase 252 production-backed subscription stories → Phase 253 real groups and whole subscription job → Phase 254 recurring quality, reviewed fixes and curation. Start at Phase **252**.
+
+**Current progress:** Phases 252 and 253 are complete. Phase 254 is next; its selection, reviewed visual correction, baseline and budget work remains unstarted.
+
+## Rolling Roadmap and Deferred Priorities
+
+The approved first milestone establishes the method, not a permanent ceiling. Near term: customer investigation and invoice/payment jobs, then recovery/webhook work. Mid term: remaining Admin sections and Portal personal/organization/read-only/host-brand journeys after explicit dev/test harness boundaries are proved. Long term: demand-driven missing situations, cross-section journeys, additional device/browser sentinels and continual pruning. Five synthetic adopter-profile briefs guide distinct coverage; implement launch/team first in the existing Cadence world, then learner/operations/self-hosted only when they add a real equivalence class. Future horizons are directional, not additional committed milestone scope.
+
+**HIGH, separate correctness candidate:** `accrue_events.inserted_at` session-timezone dependence still needs a migration or app-side timestamps. Story clocks do not fix it, and the UI milestone does not justify indefinite deferral. Preserve the remaining v1.67 future items: broader `_build` cache, helper awareness of provider-proof `should_run`, and smaller deferred v1.66 fixes. See [prior future requirements](milestones/v1.67-REQUIREMENTS.md#future-requirements).
 
 ## Shipped Milestone: v1.67 Integration & CI Green (**shipped 2026-10-26, released 1.7.0**)
 
@@ -784,7 +805,15 @@ The v1.50→v1.54 arc (Admin UI Foundation → Depth Pass → Brand System → D
 
 ### Active
 
-No active milestone requirements. The next milestone starts with fresh requirements.
+- [ ] **CIQ-02..CIQ-04, UXQ-02, UXQ-04, CURATE-01..CURATE-02** — conservative recurring checks, visual evidence and measured budgets, bounded design review, verified fixes and curated next-job coverage (Phase 254).
+
+Canonical atomic requirements and traceability: [REQUIREMENTS.md](REQUIREMENTS.md). Phases 252–253 are complete; Phase 254 remains active.
+
+### Validated v1.68 (Phases 252–253 complete 2026-10-27)
+
+- ✓ **SBK-04..SBK-06, UXQ-01, UXQ-03** — production-shared collection and whole subscription detail, 19 compiled variations, guarded mounted job, responsive/theme evidence and source-owned copy. Phase 253 independently verified 56/56 with zero unverified behavior; focused aggregate 10/10 lanes, 151 browser cells/152 tests, retained Phase252 gate 21/21, automated UAT 24/24. Exact monetary values are shown only when supplied by production; unavailable values remain explicit. Six unclassified assumptions and the source-only UI advisory remain recorded.
+
+- ✓ **SBK-01..SBK-03, SCEN-01..SCEN-04, LAB-01..LAB-02, CIQ-01** — production-backed subscription areas, deterministic ordinary/held-out facts, isolated lab, package boundaries and required CI. Independent verification 73/73, fresh required lanes 21/21, executable UAT 124/124. Static and synthetic evidence limits stay explicit; mounted journeys and recurring curation remain Phases 253–254.
 
 ### Validated v1.66 (Phases245–248; archived2026-10-12)
 
@@ -1028,6 +1057,8 @@ Admin global search — 4/4 satisfied.
 
 ## Key Decisions
 
+Phase 253 decisions: share production collection/page rendering while retaining routed authority and DataTable lifecycle; bind each browser cell to its exact compiled case and executed test; generate review guidance at its existing owner so CI regeneration preserves it. Numeric amount absence remains explicit rather than inferred from a price ID.
+
 Phase 244 decisions: use explicit producer-confirmed labels, keep unknown outcomes neutral, preserve exact evidence and native disclosure intent through patches, and associate bulk outcomes only with already-authorized delivery reads. Reuse existing test owners and bind each result to the revision tested.
 
 | Decision | Outcome |
@@ -1067,6 +1098,7 @@ Phase 244 decisions: use explicit producer-confirmed labels, keep unknown outcom
 | Preserve completed search groups when retrying failed groups, while rejecting stale query, generation and owner results. | ✓ Phase 242 — semantic retry controls passed; all 44 hook/focus/baseline controls now recur in the existing browser CI step. |
 | Preserve the incumbent global catalog model and prove exact relationships rather than inventing tenant ownership fields. | ✓ Phase 242 — exact parent/child IDs and route/session context are verified; schema and capability scope stay unchanged. |
 | Inspect fixture capture destinations before regression execution and keep generated output from overwriting historical evidence. | Phase 242 lesson — only this run’s generated historical captures were preserved in scratch and restored; no extra visual claim or correction loop. |
+| Improve existing UI through production-backed fractal Storybook situations, starting with the subscription job; preserve real lifecycle/authority proof, token owners, retained kitchen and bounded design review. | Approved 2026-10-26 — v1.68 Phases 252–254; broader Admin/Portal coverage remains a rolling roadmap. |
 
 ## Evolution
 
@@ -1086,4 +1118,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-10-26 after the v1.67 milestone (1.7.0 released).*
+*Last updated: 2026-10-27 after Phase 253 completion; Phase 254 is ready for discussion/planning. v1.67 remains shipped as 1.7.0.*

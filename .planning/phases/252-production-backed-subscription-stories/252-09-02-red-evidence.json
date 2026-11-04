@@ -1,0 +1,10 @@
+{
+  "command": "node --test --test-reporter=tap /private/tmp/phase252-heldout-red-e7UVtc/scripts/ci/verify_phase252_heldout_attribution.test.mjs",
+  "exitCode": 1,
+  "output": "TAP version 13\n# Subtest: held-out attribution identifies synthetic stress evidence\nnot ok 1 - held-out attribution identifies synthetic stress evidence\n  ---\n  duration_ms: 0.923375\n  location: '/private/tmp/phase252-heldout-red-e7UVtc/scripts/ci/verify_phase252_heldout_attribution.test.mjs:5:1'\n  failureType: 'testCodeFailure'\n  error: |-\n    shared held-out attribution assertion must exist\n    + actual - expected\n    \n    + 'undefined'\n    - 'function'\n    \n  code: 'ERR_ASSERTION'\n  name: 'AssertionError'\n  expected: 'function'\n  actual: 'undefined'\n  operator: 'strictEqual'\n  stack: |-\n    TestContext.<anonymous> (file:///private/tmp/phase252-heldout-red-e7UVtc/scripts/ci/verify_phase252_heldout_attribution.test.mjs:6:10)\n    Test.runInAsyncScope (node:async_hooks:211:14)\n    Test.run (node:internal/test_runner/test:979:25)\n    Test.start (node:internal/test_runner/test:877:17)\n    startSubtestAfterBootstrap (node:internal/test_runner/harness:296:17)\n  ...\n1..1\n# tests 1\n# suites 0\n# pass 0\n# fail 1\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 37.287417\n",
+  "targetTest": "held-out attribution identifies synthetic stress evidence",
+  "targetFile": "scripts/ci/verify_phase252_heldout_attribution.test.mjs",
+  "expected": "The shared checker exports the held-out attribution assertion.",
+  "actual": "The named assertion failed because the shared function is not implemented yet.",
+  "semanticAssessment": "The target and checker were copied byte-for-byte into an isolated temporary tree to keep machine-home paths out of committed evidence. SHA-256 matches: test=3e9c203456822ae1a106534b2dfc5491ad3d924b5908984f6ad471952627a76a, checker=19c54388ad81587d79f7e6698f55f3512e008850be817fb4e12306a41036b995. The named test loaded and failed on the planned API assertion; complete TAP report retained."
+}

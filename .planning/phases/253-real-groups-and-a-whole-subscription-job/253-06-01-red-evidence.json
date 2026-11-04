@@ -1,0 +1,10 @@
+{
+  "command": "PHASE253_REPO_ROOT=. NODE_OPTIONS=--preserve-symlinks-main node --test --test-reporter=tap /private/tmp/phase253-compositions-red.test.mjs",
+  "exitCode": 1,
+  "output": "TAP version 13\n# Subtest: focused Phase 253 composition runner exposes its bounded serial acceptance plan\nnot ok 1 - focused Phase 253 composition runner exposes its bounded serial acceptance plan\n  ---\n  duration_ms: 0.711167\n  location: '/private/tmp/phase253-compositions-red.test.mjs:9:1'\n  failureType: 'testCodeFailure'\n  error: 'focused Phase 253 composition runner must exist and load'\n  code: 'ERR_ASSERTION'\n  name: 'AssertionError'\n  operator: 'fail'\n  stack: |-\n    TestContext.<anonymous> (file:///private/tmp/phase253-compositions-red.test.mjs:14:12)\n    async Test.run (node:internal/test_runner/test:980:9)\n    async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)\n  ...\n1..1\n# tests 1\n# suites 0\n# pass 0\n# fail 1\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 32.85875",
+  "targetTest": "focused Phase 253 composition runner exposes its bounded serial acceptance plan",
+  "targetFile": "scripts/ci/verify_phase253_compositions.test.mjs",
+  "expected": "The importable focused runner exports buildCommandPlan, validateLaneEvidence, and executeCommandSequence.",
+  "actual": "The assertion failed because the planned runner module does not exist yet.",
+  "semanticAssessment": "Node executed the same tracked test file through a temporary path alias to avoid persisting a machine-specific path; the named test failed on its assertion for the missing planned runner API, and TAP discovery/reporting succeeded."
+}

@@ -1,0 +1,7 @@
+{
+  "selectionSummary": "## Phase 254 browser case selection\n- Mode: **affected**\n- Selected: 1 of 2 cases; excluded: 1\n> This is an affected selection, not the full sweep.\n### Excluded case ids\ncase-b",
+  "designReview": "Review scope: the bounded review covers the 2 enumerated D-33 capture cells.\n## Captures\n| CAP-254-01 | one |\n| CAP-254-02 | two |\n**Scoring:** none. No aesthetic score is recorded.",
+  "a11yOutput": "Phase 254 a11y: PASS (2 cells reported, 2 deep-probe cells, 0 observations all matched)",
+  "guideBriefs": "These profiles are synthetic design assumptions, not adopter research or usage evidence.",
+  "guideNextJob": "Status: `recommendation-input`. The recommendation is an input for a later choice, not a milestone or implementation commitment."
+}

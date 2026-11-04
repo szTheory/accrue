@@ -1,0 +1,10 @@
+{
+  "command": "cd accrue_admin && MIX_ENV=test mix run --no-start test/accrue_admin/dev/subscription_manifest_test.exs 1>/private/tmp/phase252-05-01-freshness-red.tap 2>/private/tmp/phase252-05-01-freshness-stderr.log",
+  "exitCode": 2,
+  "targetTest": "test generated manifest verification rejects stale source digests before accepting routes",
+  "targetFile": "subscription_manifest_test.exs",
+  "expected": "A manifest freshness verifier rejects stale source digests before a generated route can be treated as current coverage.",
+  "actual": "The named target assertion failed because SubscriptionManifest.verify!/1 is not yet exported.",
+  "output": "TAP version 13\nok 1 - test zero, duplicate, missing-ID, and missing-attribution declarations fail closed while one reconciles\nok 2 - test grouped and same-ID declarations keep path and group identity in stable keys and routes\nok 3 - test compiled subscription story discovers each real retained variation with stable routes and source digests\nnot ok 4 - test generated manifest verification rejects stale source digests before accepting routes\n# {:error, %ExUnit.AssertionError{left: :ex_unit_no_meaningful_value, right: :ex_unit_no_meaningful_value, message: \"the generated manifest freshness verifier is unavailable\", expr: :ex_unit_no_meaningful_value, args: :ex_unit_no_meaningful_value, doctest: :ex_unit_no_meaningful_value, context: :==}, [...]}\n1..4\n",
+  "semanticAssessment": "Accepted as RED: the complete TAP report shows the named target executed and failed on the direct export assertion for the not-yet-implemented verify!/1 API. The other three manifest contracts passed, test discovery and fixture setup succeeded, and the DB-free command used --no-start. Compiler diagnostics were captured separately from the unchanged TAP reporter output."
+}

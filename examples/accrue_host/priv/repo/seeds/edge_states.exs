@@ -26,6 +26,7 @@ alias Accrue.Billing.{
 }
 
 now = Accrue.Clock.utc_now()
+edge_owner_id = "314e6b2c-fd88-45b9-85b4-2623f3dc35aa"
 days_ago = fn days -> DateTime.add(now, -days * 86_400, :second) end
 
 # ---------------------------------------------------------------------------
@@ -56,7 +57,7 @@ end
 long_name_customer =
   upsert.(Customer, &Customer.changeset/2, "cus_e2e_edge_1", %{
     owner_type: "User",
-    owner_id: Ecto.UUID.generate(),
+    owner_id: edge_owner_id,
     name: "E2E Edge LongName — " <> String.duplicate("A", 90),
     email: "edge-longname@example.test",
     metadata: %{},

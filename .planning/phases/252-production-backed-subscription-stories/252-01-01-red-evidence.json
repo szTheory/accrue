@@ -1,0 +1,11 @@
+{
+  "command": "cd accrue_admin; set +e; MIX_ENV=test mix run --no-start test/accrue_admin/dev/subscription_story_slice_test.exs > /private/tmp/phase252-01-01-red.tap 2> /private/tmp/phase252-01-01-red.stderr; run_code=$?; cat /private/tmp/phase252-01-01-red.tap; cat /private/tmp/phase252-01-01-red.stderr >&2; exit \"$run_code\"",
+  "exitCode": 2,
+  "output": "TAP version 13\nnot ok 1 - test the declared active variation renders the production area from real facts without Repo\n1..1\n",
+  "targetTest": "test the declared active variation renders the production area from real facts without Repo",
+  "targetFile": "accrue_admin/test/accrue_admin/dev/subscription_story_slice_test.exs",
+  "expected": "The declared :active variation is a real Variation and can proceed to render through the production-owned summary/facts/actions area.",
+  "actual": "The story has no :active variation; Enum.find/2 returns nil and the target assertion matching %Variation{} fails.",
+  "semanticAssessment": "Valid RED: the target test ran and failed on the intended behavior assertion because the required active variation is absent. Repo isolation passed before the assertion; no fixture, collection, syntax, or import failure occurred.",
+  "stderr": "warning: redefining module AccrueAdmin.Storybook.Components.SubscriptionDetail (current version loaded from _build/test/lib/accrue_admin/ebin/Elixir.AccrueAdmin.Storybook.Components.SubscriptionDetail.beam)\nwarning: AccrueAdmin.Storybook.SubscriptionScenarios.assigns!/1 is undefined (module AccrueAdmin.Storybook.SubscriptionScenarios is not available or is yet to be defined)\nwarning: AccrueAdmin.Live.SubscriptionLive.subscription_area/1 is undefined or private"
+}

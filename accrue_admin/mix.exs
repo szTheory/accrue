@@ -4,6 +4,19 @@ defmodule AccrueAdmin.MixProject do
   @version "1.7.0"
   @source_url "https://github.com/szTheory/accrue"
 
+  # Phase 252/253 lane-owned tests. Each file either asserts that no Repo is running
+  # (`mix run --no-start` db-free lanes) or needs the lab launcher's disposable database
+  # identity, so a bare `mix test` cannot satisfy them. The lab lanes (and
+  # `mix test <path>`) still load them directly; default discovery skips them.
+  @lane_owned_tests ~w(
+    test/accrue_admin/dev/subscription_compositions_manifest_test.exs
+    test/accrue_admin/dev/subscription_manifest_test.exs
+    test/accrue_admin/dev/subscription_page_slice_test.exs
+    test/accrue_admin/dev/subscription_scenario_repo_test.exs
+    test/accrue_admin/dev/subscription_scenarios_test.exs
+    test/accrue_admin/dev/subscription_story_slice_test.exs
+  )
+
   def project do
     [
       app: :accrue_admin,
@@ -17,6 +30,8 @@ defmodule AccrueAdmin.MixProject do
       source_url: @source_url,
       docs: docs(),
       test_coverage: [summary: [threshold: 80]],
+      test_load_filters: [&(String.ends_with?(&1, "_test.exs") and &1 not in @lane_owned_tests)],
+      test_ignore_filters: [&(&1 in @lane_owned_tests)],
       dialyzer: [plt_local_path: "priv/plts", plt_add_apps: [:mix, :ex_unit]]
     ]
   end

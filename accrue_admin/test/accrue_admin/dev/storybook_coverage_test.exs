@@ -1,12 +1,34 @@
 defmodule AccrueAdmin.Dev.StorybookCoverageTest do
   @moduledoc false
 
-  use ExUnit.Case, async: true
+  use ExUnit.Case, async: false
 
   alias AccrueAdmin.Dev.ComponentRegistry
   alias AccrueAdmin.Storybook.Components.ComponentRegistry, as: ComponentRegistryStory
   alias AccrueAdmin.Storybook.Groups.ComponentGroups, as: ComponentGroupsStory
   alias AccrueAdmin.Storybook.RegistryStory
+
+  setup_all do
+    previous_accrue_env = Application.get_env(:accrue, :env, :unset)
+    previous_locale = Application.get_env(:localize, :default_locale, :unset)
+    Application.put_env(:accrue, :env, :test)
+    Application.put_env(:localize, :default_locale, :en)
+    {:ok, _started} = Application.ensure_all_started(:localize)
+
+    on_exit(fn ->
+      case previous_accrue_env do
+        :unset -> Application.delete_env(:accrue, :env)
+        value -> Application.put_env(:accrue, :env, value)
+      end
+
+      case previous_locale do
+        :unset -> Application.delete_env(:localize, :default_locale)
+        value -> Application.put_env(:localize, :default_locale, value)
+      end
+    end)
+
+    :ok
+  end
 
   test "component registry story derives one coverage row per registry family" do
     expected_families =
@@ -58,6 +80,43 @@ defmodule AccrueAdmin.Dev.StorybookCoverageTest do
       assert row.required_states == contract.required_states
       assert row.behavior_contracts == contract.behavior_contracts
       assert row.hierarchy == contract.hierarchy
+    end
+  end
+
+  test "subscription composition coverage reconciles registry families, group identity, and manifest links" do
+    alias AccrueAdmin.Storybook.SubscriptionManifest
+
+    assert Code.ensure_loaded?(SubscriptionManifest),
+           "the compiled subscription manifest module is unavailable"
+
+    assert function_exported?(SubscriptionManifest, :caller_map, 0),
+           "the production caller map is unavailable"
+
+    rows = SubscriptionManifest.caller_map()
+    entries = SubscriptionManifest.entries()
+    expected_keys = Enum.map(entries, & &1.key) |> Enum.sort()
+    family_rows = Enum.filter(rows, &is_binary(Map.get(&1, :registry_family)))
+
+    assert Enum.map(family_rows, & &1.registry_family) ==
+             Enum.map(family_rows, & &1.registry_family) |> Enum.uniq() |> Enum.sort()
+
+    for row <- family_rows do
+      registry_entries = ComponentRegistry.variants_for(row.registry_family)
+      assert registry_entries != []
+      assert row.registry_variants == Enum.map(registry_entries, & &1.variant)
+      assert row.manifest_keys == expected_keys
+    end
+
+    group = Enum.find(rows, &(&1.tier == "group"))
+    contract = ComponentRegistry.group_contract_by_slug(group.contract)
+    assert contract.proof_id == group.registry_proof_id
+    assert group.owner == "AccrueAdmin.Dev.ComponentRegistry.group_contracts/0"
+
+    source_path = Path.expand("../../../../", __DIR__)
+
+    for row <- rows do
+      evidence_path = row.evidence |> String.split(":", parts: 2) |> hd()
+      assert File.regular?(Path.join(source_path, evidence_path))
     end
   end
 

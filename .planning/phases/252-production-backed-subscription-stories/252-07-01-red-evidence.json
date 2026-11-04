@@ -1,0 +1,10 @@
+{
+  "command": "cd accrue_admin && MIX_ENV=test mix run --no-start test/accrue_admin/dev/subscription_production_boundary_test.exs",
+  "exitCode": 0,
+  "output": "TAP version 13\nok 1 - test canonical example host mount remains dev-disabled and has no Phase 252 lab forward\nok 2 - test prod-like route table omits Storybook, test, and lab routes while retaining product routes\nok 3 - test real dev routes keep Storybook, its assets, and the independent kitchen visible\nok 4 - test story facts, adapters, manifests, runners, and browser support stay outside production sources\nok 5 - test production Mix project metadata excludes facts and story adapters from compile and package roots\n1..5\n",
+  "targetTest": "test production Mix project metadata excludes facts and story adapters from compile and package roots",
+  "targetFile": "accrue_admin/test/accrue_admin/dev/subscription_production_boundary_test.exs",
+  "expected": "The production package roots and Storybook dependency scope should exclude scenario facts and adapters while dev/test routes remain visible.",
+  "actual": "All five boundary assertions passed before this plan added them: the production source roots and package metadata were already isolated, and route tables preserved dev-positive and production-negative controls.",
+  "semanticAssessment": "This is characterization coverage, not a valid RED: the requested contract already holds in the baseline supplied by Phase 252-06, so there is no production implementation for Task 1 to add. The report must be classified as unexpected_green; no behavior is fabricated to force a red result."
+}

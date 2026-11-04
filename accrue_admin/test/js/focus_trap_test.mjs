@@ -463,6 +463,141 @@ test("focus restoration prefers the surviving replacement trigger over the remov
   });
 });
 
+// Phase 254 UXQ-02 (A11Y-254-29): Escape closes the action menu and the drawer together, so the
+// control that opened the drawer is hidden when the drawer is torn down. Focus returns to the
+// menu button (the <summary>) that owns the closed menu, not to the page.
+test("focus returns to the owning menu button when the opener sat in a menu that has closed", () => {
+  const documentLike = fakeDocument();
+  const menuItem = focusable("menu-item", documentLike);
+  const summary = focusable("more-actions", documentLike);
+  summary.localName = "summary";
+  summary.matches = () => false;
+  summary.parentElement = { localName: "details" };
+  menuItem.closest = (selector) => (selector === "details" ? { querySelector: (inner) => (inner === ":scope > summary" ? summary : null) } : null);
+  const close = focusable("close", documentLike);
+  const fallbackPage = focusable("main", documentLike);
+  documentLike.registry["#main-content, main"] = fallbackPage;
+  const root = rootElement([close], { focusTrapCloseEvent: "close_drawer" });
+
+  withDocument(documentLike, () => {
+    menuItem.focus();
+    const hook = { ...FocusTrap, el: root, pushEvent() {} };
+    hook.mounted();
+    close.focus();
+    menuItem.hidden = true; // the menu closed with Escape: the opener is not visible or focusable
+
+    hook.destroyed();
+
+    assert.equal(documentLike.activeElement, summary);
+    assert.equal(summary.focusCount, 1);
+    assert.equal(fallbackPage.focusCount, 0);
+  });
+});
+
+// A closed <details> keeps boxes for its content (content-visibility), so the opener inside it looks
+// visible to getBoundingClientRect even though it cannot take focus. It must be treated as hidden.
+test("an opener inside a closed disclosure is skipped for the disclosure's own summary", () => {
+  const documentLike = fakeDocument();
+  const menuItem = focusable("menu-item", documentLike);
+  const summary = focusable("more-actions", documentLike);
+  summary.localName = "summary";
+  summary.matches = () => false;
+  summary.parentElement = { localName: "details" };
+  summary.contains = (node) => node === summary;
+  const closedDetails = {
+    localName: "details",
+    hasAttribute: () => false,
+    querySelector: (inner) => (inner === ":scope > summary" ? summary : null)
+  };
+  menuItem.parentElement = { closest: (selector) => (selector === "details:not([open])" ? closedDetails : null) };
+  menuItem.closest = (selector) => (selector === "details" ? closedDetails : null);
+  const close = focusable("close", documentLike);
+  const root = rootElement([close], { focusTrapCloseEvent: "close_drawer" });
+
+  withDocument(documentLike, () => {
+    menuItem.focus();
+    const hook = { ...FocusTrap, el: root, pushEvent() {} };
+    hook.mounted();
+    close.focus();
+    hook.destroyed();
+
+    assert.equal(documentLike.activeElement, summary);
+    assert.equal(menuItem.focusCount, 1, "the opener took focus once when the drawer opened and never again");
+    assert.equal(summary.focusCount, 1);
+  });
+});
+
+// The delayed return runs two animation frames after the overlay closes. A user who has already
+// moved to another control (keyboard users tab quickly) must keep it.
+test("the delayed focus return does not take a control the user has already moved to", () => {
+  const documentLike = fakeDocument();
+  const trigger = focusable("trigger", documentLike);
+  const elsewhere = focusable("back-link", documentLike);
+  const close = focusable("close", documentLike);
+  const root = rootElement([close], { focusTrapCloseEvent: "close_drawer" });
+  let pending = null;
+  const windowLike = { ...fakeWindow(), requestAnimationFrame(callback) { pending = callback; return 1; } };
+
+  withDocument(documentLike, () => {
+    trigger.focus();
+    const hook = { ...FocusTrap, el: root, pushEvent() {} };
+    hook.mounted();
+    close.focus();
+    hook.destroyed();
+    elsewhere.focus(); // before the frames elapse
+    pending?.();
+    pending?.();
+
+    assert.equal(documentLike.activeElement, elsewhere);
+    assert.equal(trigger.focusCount, 1, "the opener took focus once, when the overlay opened");
+  }, windowLike);
+});
+
+test("the delayed focus return still runs when focus is lost (positive control)", () => {
+  const documentLike = fakeDocument();
+  const trigger = focusable("trigger", documentLike);
+  const close = focusable("close", documentLike);
+  const root = rootElement([close], { focusTrapCloseEvent: "close_drawer" });
+  let pending = null;
+  const windowLike = { ...fakeWindow(), requestAnimationFrame(callback) { pending = callback; return 1; } };
+
+  withDocument(documentLike, () => {
+    trigger.focus();
+    const hook = { ...FocusTrap, el: root, pushEvent() {} };
+    hook.mounted();
+    close.focus();
+    hook.destroyed();
+    documentLike.activeElement = null; // the overlay left the page and focus fell to nothing
+    pending?.();
+    pending?.();
+
+    assert.equal(documentLike.activeElement, trigger);
+  }, windowLike);
+});
+
+test("the owning menu button is not used while the opener is still focusable (positive control)", () => {
+  const documentLike = fakeDocument();
+  const menuItem = focusable("menu-item", documentLike);
+  const summary = focusable("more-actions", documentLike);
+  summary.localName = "summary";
+  summary.matches = () => false;
+  summary.parentElement = { localName: "details" };
+  menuItem.closest = () => ({ querySelector: () => summary });
+  const close = focusable("close", documentLike);
+  const root = rootElement([close], { focusTrapCloseEvent: "close_drawer" });
+
+  withDocument(documentLike, () => {
+    menuItem.focus();
+    const hook = { ...FocusTrap, el: root, pushEvent() {} };
+    hook.mounted();
+    close.focus();
+    hook.destroyed();
+
+    assert.equal(documentLike.activeElement, menuItem);
+    assert.equal(summary.focusCount, 0);
+  });
+});
+
 test("rapid teardown with reduced motion cancels pending focus and cannot intercept later Tab", async () => {
   const documentLike = fakeDocument();
   const trigger = focusable("trigger", documentLike);

@@ -6,6 +6,8 @@ set -euo pipefail
 root_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 package_file="$root_dir/accrue_admin/package.json"
 runner_file="$root_dir/scripts/ci/verify_phase200_admin_guardrails.sh"
+phase253_runner_file="$root_dir/scripts/ci/verify_phase253_compositions.mjs"
+phase254_quality_file="$root_dir/scripts/ci/verify_phase254_quality.mjs"
 package_docs_file="$root_dir/scripts/ci/verify_package_docs.sh"
 storybook_spec="$root_dir/accrue_admin/e2e/admin-storybook-a11y-phase200.spec.js"
 page_flow_spec="$root_dir/accrue_admin/e2e/admin-page-flow-phase200.spec.js"
@@ -78,6 +80,8 @@ package_script_value() {
 for file in \
   "$package_file" \
   "$runner_file" \
+  "$phase253_runner_file" \
+  "$phase254_quality_file" \
   "$package_docs_file" \
   "$storybook_spec" \
   "$page_flow_spec" \
@@ -104,11 +108,34 @@ require_fixed "$runner_file" "cd accrue_admin && npm run e2e:phase199"
 require_fixed "$runner_file" "cd accrue_admin && env -u NO_COLOR npx playwright test e2e/reduced-motion.spec.js --timeout=60000 --workers=1"
 require_fixed "$runner_file" "cd accrue_admin && npm run phase200:scorecard"
 require_fixed "$runner_file" "cd accrue_admin && npm run phase200:signoff"
+require_fixed "$runner_file" 'run_step "Phase 252 complete subscription story acceptance" npm --prefix accrue_admin run phase252:check'
+require_regex "$runner_file" '^run_step "Phase 253 focused composition acceptance" node scripts/ci/verify_phase253_compositions\.mjs$'
+
+phase252_step_line="$(grep -nFx 'run_step "Phase 252 complete subscription story acceptance" npm --prefix accrue_admin run phase252:check' "$runner_file" | cut -d: -f1)"
+phase253_step_line="$(grep -nFx 'run_step "Phase 253 focused composition acceptance" node scripts/ci/verify_phase253_compositions.mjs' "$runner_file" | cut -d: -f1)"
+[[ "$phase253_step_line" -gt "$phase252_step_line" ]] ||
+  fail "Phase 253 focused composition acceptance must run after the complete Phase 252 check"
+
+require_regex "$runner_file" '^run_step "Phase 254 recurring budget check" node scripts/ci/phase254_budget\.mjs check$'
+phase254_step_line="$(grep -nFx 'run_step "Phase 254 recurring budget check" node scripts/ci/phase254_budget.mjs check' "$runner_file" | cut -d: -f1)"
+[[ "$phase254_step_line" -gt "$phase253_step_line" ]] ||
+  fail "Phase 254 recurring budget check must run after the Phase 253 focused composition acceptance"
+
+require_regex "$runner_file" '^run_step "Phase 254 quality records" node scripts/ci/verify_phase254_quality\.mjs$'
+require_fixed "$phase254_quality_file" 'scripts/ci/phase254_selection.mjs'
+require_fixed "$phase254_quality_file" 'scripts/ci/verify_phase254_curation.mjs'
+require_fixed "$phase254_quality_file" 'scripts/ci/verify_a11y_dispositions.mjs'
+require_fixed "$phase254_quality_file" 'scripts/ci/verify_phase254_design_review.mjs'
+require_fixed "$phase254_quality_file" 'scripts/ci/recompose_storybook_css.mjs'
+phase254_quality_line="$(grep -nFx 'run_step "Phase 254 quality records" node scripts/ci/verify_phase254_quality.mjs' "$runner_file" | cut -d: -f1)"
+[[ "$phase254_quality_line" -gt "$phase254_step_line" ]] ||
+  fail "Phase 254 quality records must run after the recurring budget check"
 
 storybook_script="$(package_script_value "phase200:storybook")"
 scorecard_script="$(package_script_value "phase200:scorecard")"
 signoff_script="$(package_script_value "phase200:signoff")"
 guardrails_script="$(package_script_value "phase200:guardrails")"
+phase252_script="$(package_script_value "phase252:check")"
 
 grep -Fq "test/accrue_admin/dev/storybook_coverage_test.exs" <<<"$storybook_script" ||
   fail "phase200:storybook must run storybook_coverage_test.exs"
@@ -131,18 +158,22 @@ grep -Fq "node ../scripts/ci/generate_phase200_closeout_reports.mjs --record-fin
 
 grep -Fq "bash ../scripts/ci/verify_phase200_admin_guardrails.sh" <<<"$guardrails_script" ||
   fail "phase200:guardrails must point at ../scripts/ci/verify_phase200_admin_guardrails.sh"
+grep -Fq "node ../scripts/ci/verify_phase252_stories.mjs" <<<"$phase252_script" ||
+  fail "phase252:check must invoke the complete Phase 252 serial runner"
 
 require_fixed "$package_file" '"phase200:storybook"'
 require_fixed "$package_file" '"phase200:scorecard"'
 require_fixed "$package_file" '"phase200:signoff"'
 require_fixed "$package_file" '"phase200:guardrails"'
+require_fixed "$package_file" '"phase252:check"'
 require_regex "$package_file" '"phase200:guardrails"[[:space:]]*:[[:space:]]*"bash \.\./scripts/ci/verify_phase200_admin_guardrails\.sh"'
 
 runner_source="$(cat "$runner_file")"
 phase200_script_values="$storybook_script
 $scorecard_script
 $signoff_script
-$guardrails_script"
+$guardrails_script
+$phase252_script"
 
 for pattern in \
   'npm run e2e([[:space:]"'\'';&|]|$)' \
