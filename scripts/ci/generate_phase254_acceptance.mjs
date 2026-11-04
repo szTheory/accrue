@@ -81,6 +81,12 @@ export const EDGE_BINDINGS = Object.freeze({
 });
 export const AMENDMENT_IDS = Object.freeze(["AMD-254-01", "AMD-254-02", "AMD-254-03", "AMD-254-04", "AMD-254-05"]);
 export const CHECKPOINT_TASK_IDS = Object.freeze(["254-03-01", "254-03-03", "254-15-02", "254-18-02"]);
+const CHECKPOINT_EVIDENCE_REFS = Object.freeze({
+  "254-03-01": "254-03-CHECKPOINT-LOG.md",
+  "254-03-03": "254-03-SUMMARY.md",
+  "254-15-02": "254-15-CHECKPOINT-LOG.md",
+  "254-18-02": "254-18-SUMMARY.md",
+});
 export const UNRESOLVED_ASSUMPTION_IDS = Object.freeze([
   "EDGE-CIQ-02-unclassified", "EDGE-CIQ-03-unclassified", "EDGE-CIQ-04-unclassified", "EDGE-CURATE-02-unclassified",
 ]);
@@ -311,37 +317,70 @@ function loadSummary(root, name) {
   return { name, absolute, source, frontmatter: fm, status: "complete", human_judgment: scalar(fm, "human_judgment") ?? null, coverage, completed };
 }
 function currentValidationRows(root) {
-  const source = fs.readFileSync(safePath(root, VALIDATION_PATH, "Phase 254 validation map"), "utf8");
+  const source = phaseFile(root, "254-VALIDATION.md").source;
   const rows = new Map();
+  const unmarkdownCell = (value) => value.replaceAll("&#124;", "|").replaceAll("<br>", "\n").trim();
   for (const line of source.split(/\r?\n/)) {
     if (!line.startsWith("| 254-")) continue;
-    const cells = line.split("|").slice(1, -1).map((cell) => cell.trim());
+    const cells = line.split("|").slice(1, -1).map((cell) => unmarkdownCell(cell.trim()));
     if (cells.length < 10 || !/^254-\d{2}-\d{2}$/.test(cells[0])) continue;
     rows.set(cells[0], { command: cells[7], status: cells[9], requirement: cells[3], threat_ref: cells[4] });
   }
   return rows;
 }
+function taskResultBlock(source) {
+  const match = source.match(/<!-- phase254-task-results:start\s*([\s\S]*?)\s*phase254-task-results:end -->/);
+  if (!match) return {};
+  try {
+    const parsed = JSON.parse(match[1]);
+    return object(parsed.tasks, "per-task execution results");
+  } catch (error) {
+    if (error instanceof SyntaxError) fail("per-task execution results are malformed JSON");
+    throw error;
+  }
+}
+function currentTaskResults(root) {
+  return taskResultBlock(phaseFile(root, "254-VALIDATION.md").source);
+}
+function expectedTaskCommand(task) {
+  return task.automated ?? `checkpoint:${task.id}`;
+}
+function expectedTaskDisplayCommand(task) {
+  return task.automated ?? `checkpoint:decision (recorded answer for ${task.id})`;
+}
+function evidenceRefsForPlan(summaries, plan) {
+  return summaries.find(({ name }) => name === `${plan}-SUMMARY.md`)
+    ?.coverage.flatMap((entry) => entry.verification.map(({ ref }) => ref)) ?? [];
+}
+export function taskResultIsGreen(task, result, summaryRefs, checkpointRecord) {
+  if (!result || result.task_id !== task.id || result.status !== "pass" || result.skipped !== 0 || result.retries !== 0) return false;
+  if (result.command_sha256 !== sha256(expectedTaskCommand(task)) || !Array.isArray(result.evidence_refs) || result.evidence_refs.length === 0) return false;
+  if (task.checkpoint) {
+    const expectedRef = CHECKPOINT_EVIDENCE_REFS[task.id];
+    return result.checkpoint_answer === checkpointRecord?.[task.id] &&
+      result.evidence_refs.length === 1 && result.evidence_refs[0] === expectedRef &&
+      typeof result.checkpoint_answer === "string" && result.checkpoint_answer.length > 0;
+  }
+  return result.evidence_refs.every((ref) => summaryRefs.includes(ref));
+}
 function markdownCell(value) {
   return String(value ?? "—").replaceAll("|", "&#124;").replaceAll("\n", "<br>").trim() || "—";
 }
-export function writeValidationMap({ root = ROOT, greenTaskIds = [] } = {}) {
+export function writeValidationMap({ root = ROOT } = {}) {
   const repository = fs.realpathSync(root);
   const metadata = inspectPhase254Metadata({ root: repository });
   const summaries = SUMMARY_NAMES.filter((name) => fs.existsSync(summaryPath(repository, name))).map((name) => loadSummary(repository, name));
   const summaryByPlan = new Map(summaries.map((summary) => [summary.name.replace("-SUMMARY.md", ""), summary]));
-  const explicitGreen = new Set(greenTaskIds);
+  const taskResults = currentTaskResults(repository);
+  const validationRows = currentValidationRows(repository);
   const budgetFile = safePath(repository, BUDGET_PATH, "Phase 254 budget");
   const budget = fs.existsSync(budgetFile) ? JSON.parse(fs.readFileSync(budgetFile, "utf8")) : {};
   const cp = budget.metrics?.final ? checkpointAnswers(repository, budget, summaries) : {};
   const rows = metadata.tasks.map((task) => {
     const summary = summaryByPlan.get(task.plan);
-    let green = summary?.coverage.length > 0 && summary.coverage.every((entry) => entry.human_judgment === false && entry.verification.every(({ status }) => status === "pass"));
-    if (task.plan === "254-18") {
-      if (task.id === "254-18-01") green = Array.isArray(budget.metrics?.final?.runs) && ["admin-phase200-guardrails", "browser-uat"].every((job) => budget.metrics.final.runs.some((run) => run.job === job && run.attempt === 1 && run.conclusion === "success" && run.phase_owned_ok === true));
-      else if (task.id === "254-18-02") green = !!cp[task.id];
-      else green = explicitGreen.has(task.id);
-    }
-    const command = task.automated ?? "node scripts/ci/generate_phase254_acceptance.mjs --latest --expect-pending 254-18";
+    const result = taskResults[task.id];
+    let green = taskResultIsGreen(task, result, summary?.coverage.flatMap((entry) => entry.verification.map(({ ref }) => ref)) ?? [], cp);
+    const command = expectedTaskDisplayCommand(task);
     const exists = task.files.length === 0 ? "n/a" : task.files.every((relative) => fs.existsSync(safePath(repository, relative, `${task.id} owned file`))) ? "yes" : "no";
     if (exists === "no") green = false;
     return {
@@ -366,25 +405,24 @@ export function writeValidationMap({ root = ROOT, greenTaskIds = [] } = {}) {
   fs.writeFileSync(safePath(repository, VALIDATION_PATH, "Phase 254 validation map"), updated);
   return { task_count: rows.length, green_count: rows.filter(({ green }) => green).length, pending: rows.filter(({ green }) => !green).map(({ task }) => task.id), nyquist_compliant: allGreen, wave_0_complete: allGreen };
 }
-function taskEvidence(metadata, summaries, validationRows) {
+function taskEvidence(metadata, summaries, validationRows, taskResults, checkpointRecord) {
   const result = {};
   for (const task of metadata.tasks) {
-    const summary = summaries.find(({ name }) => name === `${task.plan}-SUMMARY.md`);
-    const refs = summary?.coverage.flatMap((entry) => entry.verification.map(({ ref }) => ref)) ?? [];
-    const row = validationRows.get(task.id);
-    const validationCurrent = task.plan === "254-18" && row?.status === "✅ green" && row.command;
-    const executed = refs.length > 0 || validationCurrent;
-    const referenceText = refs.join("\n");
-    const skipped = Number(referenceText.match(/\b(\d+)\s+skipped\b/i)?.[1] ?? 0);
-    const retries = Number(referenceText.match(/\b(\d+)\s+(?:retries|retried)\b/i)?.[1] ?? 0);
+    const summaryRefs = evidenceRefsForPlan(summaries, task.plan);
+    const validationRow = validationRows.get(task.id);
+    const taskResult = taskResults[task.id];
+    const executed = taskResultIsGreen(task, taskResult, summaryRefs, checkpointRecord) &&
+      validationRow?.command === expectedTaskDisplayCommand(task) && validationRow?.status === "✅ green";
     result[task.id] = {
       plan: task.plan,
+      task_id: task.id,
       requirements: task.requirements,
-      evidence_refs: refs.length > 0 ? refs : validationCurrent ? [row.command] : [],
+      evidence_refs: taskResult?.evidence_refs ?? [],
+      command_sha256: taskResult?.command_sha256 ?? null,
       status: executed ? "pass" : "missing",
-      skipped,
-      retries,
-      automated_command: task.automated ?? row?.command ?? "Checkpoint disposition checked by the Phase 254 acceptance verifier",
+      skipped: taskResult?.skipped ?? null,
+      retries: taskResult?.retries ?? null,
+      automated_command: expectedTaskDisplayCommand(task),
       threat_refs: task.threat_refs,
     };
   }
@@ -456,6 +494,7 @@ function collectEvidence(root) {
   const metadata = inspectPhase254Metadata({ root: repository });
   const summaries = SUMMARY_NAMES.filter((name) => fs.existsSync(summaryPath(repository, name))).map((name) => loadSummary(repository, name));
   const validationRows = currentValidationRows(repository);
+  const taskResults = currentTaskResults(repository);
   const budget = readJson(repository, BUDGET_PATH, "Phase 254 budget");
   const { found: amendments, ledger, cases, design } = amendmentRows(repository);
   const { manifest, keys: manifest_keys, mint_run_ids } = manifestMintRuns(repository);
@@ -520,7 +559,8 @@ function collectEvidence(root) {
     root: repository,
     metadata,
     summaries,
-    tasks: taskEvidence(metadata, summaries, validationRows),
+    tasks: taskEvidence(metadata, summaries, validationRows, taskResults, checkpointRecord),
+    task_results: taskResults,
     edge_evidence: edgeEvidence,
     prohibitions: metadata.prohibition_statements.map((statement) => {
       const check = proof.checks.find(({ projection }) => projection?.statement === statement);
@@ -561,13 +601,32 @@ export function validatePhase254Evidence(evidence) {
     fail("a SUMMARY has missing or human-judgment-only acceptance evidence");
   }
   exactSet(Object.keys(evidence.tasks ?? {}), taskIds, "task evidence IDs");
+  exactSet(Object.keys(evidence.task_results ?? {}), taskIds, "per-task result IDs");
+  exactSet(Object.keys(evidence.checkpoints ?? {}), CHECKPOINT_TASK_IDS, "checkpoint answer IDs");
+  for (const id of CHECKPOINT_TASK_IDS) if (!evidence.checkpoints[id]) fail(`${id} has no recorded answer`);
   for (const task of metadata.tasks) {
     const row = object(evidence.tasks[task.id], `task evidence ${task.id}`);
+    const result = object(evidence.task_results[task.id], `per-task result ${task.id}`);
+    const expectedCommand = expectedTaskCommand(task);
+    if (result.task_id !== task.id || row.task_id !== task.id || result.command_sha256 !== sha256(expectedCommand) || row.command_sha256 !== result.command_sha256) {
+      fail(`${task.id} task evidence command identity mismatch`);
+    }
+    if (result.status !== "pass" || !Array.isArray(result.evidence_refs) || result.evidence_refs.length === 0) fail(`${task.id} has no executed green evidence`);
+    if ((result.skipped ?? 0) !== 0) fail(`${task.id} evidence contains skipped tests`);
+    if ((result.retries ?? 0) !== 0) fail(`${task.id} evidence contains retried tests`);
+    if (task.checkpoint) {
+      if (result.checkpoint_answer !== evidence.checkpoints?.[task.id] || result.evidence_refs.length !== 1 || result.evidence_refs[0] !== CHECKPOINT_EVIDENCE_REFS[task.id]) {
+        fail(`${task.id} checkpoint evidence does not match its recorded answer`);
+      }
+    } else if (result.evidence_refs.some((ref) => !evidenceRefsForPlan(evidence.summaries, task.plan).includes(ref))) {
+      fail(`${task.id} evidence reference is not present in its own plan summary`);
+    }
     if (row.status !== "pass" || !Array.isArray(row.evidence_refs) || row.evidence_refs.length === 0) fail(`${task.id} has no executed green evidence`);
     if ((row.skipped ?? 0) !== 0) fail(`${task.id} evidence contains skipped tests`);
     if ((row.retries ?? 0) !== 0) fail(`${task.id} evidence contains retried tests`);
     exactSet(row.requirements, task.requirements, `${task.id} requirement bindings`);
-    if (!row.automated_command) fail(`${task.id} has no executable verification command`);
+    if (row.automated_command !== expectedTaskDisplayCommand(task)) fail(`${task.id} has no matching executable verification command`);
+    if (JSON.stringify(row.evidence_refs) !== JSON.stringify(result.evidence_refs)) fail(`${task.id} task evidence does not match its recorded result`);
   }
   exactSet(Object.keys(evidence.edge_evidence ?? {}), [...EDGE_IDS], "explicit edge evidence IDs");
   for (const id of EDGE_IDS) {
@@ -630,8 +689,6 @@ export function validatePhase254Evidence(evidence) {
   if (!/403/.test(isolation) || !/isolation/.test(isolation) || !/interleav|race|reconcil|dependent/i.test(evidence.tasks["254-05-02"]?.evidence_refs?.join("\n") ?? "") || !/pure-story|classifier|ownership/i.test(evidence.tasks["254-02-03"]?.evidence_refs?.join("\n") ?? "") || !fanout) {
     fail("CIQ-02 isolation evidence or the Phase 254 fan-out record is missing");
   }
-  exactSet(Object.keys(evidence.checkpoints), CHECKPOINT_TASK_IDS, "checkpoint answer IDs");
-  for (const id of CHECKPOINT_TASK_IDS) if (!evidence.checkpoints[id]) fail(`${id} has no recorded answer`);
   if (evidence.checkpoints["254-18-02"] === "not required" && evidence.escalation_count !== 0) fail("254-18-02 cannot be marked not required while an escalation is present");
 
   const budget = object(evidence.budget, "budget record");

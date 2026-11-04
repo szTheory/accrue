@@ -71,6 +71,9 @@ coverage:
       - kind: command
         ref: "Phase 254-16 and 254-17 evidence, the curation transparency checks and the acceptance generator all passed; all task rows are present in the 51-row Per-Task Verification Map."
         status: pass
+      - kind: command
+        ref: "node --test --test-reporter=tap scripts/ci/generate_phase254_acceptance.test.mjs (29/29): per-task command identities and result references are enforced; missing evidence and the pending-summary fixture are rejected correctly."
+        status: pass
     human_judgment: false
 
 human_judgment: false

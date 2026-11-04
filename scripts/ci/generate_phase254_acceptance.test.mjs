@@ -18,6 +18,9 @@ function requireHash(bytes) {
 function createHash(bytes) {
   return crypto.createHash("sha256").update(bytes).digest("hex");
 }
+function hashText(value) {
+  return crypto.createHash("sha256").update(value).digest("hex");
+}
 function fixtureEvidence() {
   const metadata = generator.inspectPhase254Metadata({ root });
   const ledger = readJson("accrue_admin/storybook/subscription-curation.json");
@@ -29,27 +32,46 @@ function fixtureEvidence() {
   const sourceAssets = Object.entries(designReview.assets).flatMap(([key, value]) => value.path ? [{ key, path: value.path, sha256: value.sha256 }] : []);
   const visualAssets = Object.entries(manifestEntries).map(([key, value]) => ({ key, expected_sha256: value.sha256, actual_sha256: value.sha256 }));
   const curationSources = Object.entries(ledger.source_digests ?? {}).map(([sourcePath, expected_sha256]) => ({ path: sourcePath, expected_sha256, actual_sha256: expected_sha256 }));
+  const checkpointAnswers = {
+    "254-03-01": "push-approved",
+    "254-03-03": "fix-in-phase; accept-known-red for KR-254-06",
+    "254-15-02": "fix-in-phase; accept-attributable",
+    "254-18-02": "not required",
+  };
   const amendments = [
     ...(ledger.amendments ?? []).map((row) => ({ ...row, source: "accrue_admin/storybook/subscription-curation.json" })),
     ...(visualCases.amendments ?? []).map((row) => ({ ...row, source: "accrue_admin/storybook/phase254-visual-cases.json" })),
     ...(designReview.amendments ?? []).map((row) => ({ ...row, source: `.planning/phases/${generator.PHASE_SLUG}/254-DESIGN-REVIEW.json` })),
   ];
-  const taskEvidence = Object.fromEntries(metadata.tasks.map((task) => {
-    let refs = [`${task.id} executed test identity passes`];
-    if (task.id === "254-05-01") refs = ["live isolation test: 403 in review lane, test lane 200"];
-    if (task.id === "254-05-02") refs = ["interleaved race control, reconciliation and dependent project identity pass"];
-    if (task.id === "254-02-03") refs = ["pure-story classifier and ownership contract pass"];
-    return [task.id, {
-      plan: task.plan,
-      requirements: [...task.requirements],
-      evidence_refs: refs,
-      status: "pass",
-      skipped: 0,
-      retries: 0,
-      automated_command: task.automated ?? "Acceptance contract test",
-      threat_refs: [...task.threat_refs],
-    }];
-  }));
+  const taskResults = Object.fromEntries(metadata.tasks.map((task) => [task.id, {
+    task_id: task.id,
+    command_sha256: hashText(task.automated ?? `checkpoint:${task.id}`),
+    status: "pass",
+    skipped: 0,
+    retries: 0,
+    evidence_refs: [task.id === "254-05-01" ? "live isolation test: 403 in review lane, test lane 200" :
+      task.id === "254-05-02" ? "interleaved race control, reconciliation and dependent project identity pass" :
+        task.id === "254-02-03" ? "pure-story classifier and ownership contract pass" :
+          task.automated ? `${task.plan}-SUMMARY.md#${task.id}` : ({
+      "254-03-01": "254-03-CHECKPOINT-LOG.md",
+      "254-03-03": "254-03-SUMMARY.md",
+      "254-15-02": "254-15-CHECKPOINT-LOG.md",
+      "254-18-02": "254-18-SUMMARY.md",
+    })[task.id]],
+    ...(task.checkpoint ? { checkpoint_answer: checkpointAnswers[task.id] } : {}),
+  }]));
+  const taskEvidence = Object.fromEntries(metadata.tasks.map((task) => [task.id, {
+    plan: task.plan,
+    task_id: task.id,
+    requirements: [...task.requirements],
+    evidence_refs: taskResults[task.id].evidence_refs,
+    command_sha256: taskResults[task.id].command_sha256,
+    status: "pass",
+    skipped: 0,
+    retries: 0,
+    automated_command: task.automated ?? `checkpoint:decision (recorded answer for ${task.id})`,
+    threat_refs: [...task.threat_refs],
+  }]));
   const head = "a".repeat(40);
   const budget = {
     manifest_sha256: sha("storybook/phase252-manifest.json"),
@@ -64,12 +86,20 @@ function fixtureEvidence() {
     ],
     known_reds: [],
   };
-  const summaries = [{ status: "complete", coverage: [{ human_judgment: false, verification: [{ status: "pass" }] }] }];
+  const summaries = metadata.plans.map((plan) => ({
+    name: plan.name.replace("-PLAN.md", "-SUMMARY.md"),
+    status: "complete",
+    coverage: metadata.tasks.filter((task) => task.plan === plan.name.replace("-PLAN.md", "")).map((task) => ({
+      human_judgment: false,
+      verification: taskResults[task.id].evidence_refs.map((ref) => ({ ref, status: "pass" })),
+    })),
+  }));
   const mintRunIds = [...new Set(Object.values(manifestEntries).filter((entry) => entry.provenance !== "phase211-committed" && entry.mint_run_id != null).map((entry) => String(entry.mint_run_id)))].sort();
   return {
     metadata,
     summaries,
     tasks: taskEvidence,
+    task_results: taskResults,
     edge_evidence: Object.fromEntries(generator.EDGE_IDS.map((id) => {
       const binding = generator.EDGE_BINDINGS[id];
       return [id, {
@@ -101,12 +131,7 @@ function fixtureEvidence() {
       source_drift_after_measurement: [],
     },
     budget,
-    checkpoints: {
-      "254-03-01": "push-approved",
-      "254-03-03": "fix-in-phase; accept-known-red for KR-254-06",
-      "254-15-02": "fix-in-phase; accept-attributable",
-      "254-18-02": "not required",
-    },
+    checkpoints: checkpointAnswers,
     escalation_count: 0,
     final_runs: [
       { job: "admin-phase200-guardrails", run_id: 11, head_sha: head, attempt: 1, conclusion: "success", phase_owned_ok: true },
@@ -152,6 +177,28 @@ test("every explicit edge is bound to its named test identities, source file and
 
 test("a missing requirement is rejected", () => rejects((e) => e.metadata.requirements.pop(), /requirement IDs mismatch/));
 test("a task without executed evidence is rejected", () => rejects((e) => { delete e.tasks["254-14-02"]; }, /task evidence IDs mismatch/));
+test("task evidence is bound to the task ID, exact planned command and task-specific summary result", () => {
+  rejects((e) => { delete e.task_results["254-14-02"]; }, /per-task result IDs mismatch/);
+  rejects((e) => { e.task_results["254-14-02"].command_sha256 = "0".repeat(64); }, /command identity mismatch/);
+  rejects((e) => { e.task_results["254-14-02"].evidence_refs = ["254-13-SUMMARY.md#254-13-02"]; }, /not present in its own plan summary/);
+  rejects((e) => { e.task_results["254-14-02"].status = "failed"; }, /has no executed green evidence/);
+  rejects((e) => { e.task_results["254-14-02"].skipped = 1; }, /skipped tests/);
+});
+test("plan-level summary coverage cannot mark a task green without its own matching result", () => {
+  const task = generator.inspectPhase254Metadata({ root }).tasks.find(({ id }) => id === "254-01-01");
+  const summaryRefs = ["254-01-SUMMARY.md#plan-level-green"];
+  assert.equal(generator.taskResultIsGreen(task, null, summaryRefs, {}), false);
+  const result = {
+    task_id: task.id,
+    command_sha256: hashText(task.automated),
+    status: "pass",
+    skipped: 0,
+    retries: 0,
+    evidence_refs: summaryRefs,
+  };
+  assert.equal(generator.taskResultIsGreen(task, result, summaryRefs, {}), true);
+  assert.equal(generator.taskResultIsGreen(task, { ...result, command_sha256: "0".repeat(64) }, summaryRefs, {}), false);
+});
 test("skipped or retried test evidence is rejected", () => {
   rejects((e) => { e.tasks["254-14-02"].skipped = 1; }, /skipped tests/);
   rejects((e) => { e.tasks["254-14-02"].retries = 1; }, /retried tests/);
@@ -191,7 +238,11 @@ test("AMD-254-06 is required for multiple mint identities and must name the exac
   rejects((e) => { e.manifest.mint_run_ids = ["run-a", "run-b"]; e.amendments.find((row) => row.id === "AMD-254-06").amended = ["run-a"]; }, /mint run identities mismatch/);
 });
 test("CIQ-02 needs the isolation identities, pure-story classifier and fan-out decision", () => {
-  rejects((e) => { e.tasks["254-05-01"].evidence_refs = ["review lane works"]; }, /CIQ-02 isolation evidence/);
+  rejects((e) => {
+    e.tasks["254-05-01"].evidence_refs = ["review lane works"];
+    e.task_results["254-05-01"].evidence_refs = ["review lane works"];
+    e.summaries.find(({ name }) => name === "254-05-SUMMARY.md").coverage.find((entry) => entry.verification.some(({ ref }) => ref === "live isolation test: 403 in review lane, test lane 200")).verification[0].ref = "review lane works";
+  }, /CIQ-02 isolation evidence/);
   rejects((e) => { e.budget.deviations = e.budget.deviations.filter((row) => row.kind !== "ciq02-fanout-enabled"); }, /CIQ-02 isolation evidence/);
 });
 test("the confirmed design review must cover every rubric dimension", () => rejects((e) => { e.design_review.rubric_verdicts.pop(); }, /rubric dimensions mismatch/));

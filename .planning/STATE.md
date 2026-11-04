@@ -4,11 +4,11 @@ milestone: v1.68
 milestone_name: UI Storybook Stress Testing
 current_phase: 254
 current_phase_name: Recurring Quality, Reviewed Fixes and Curation
-status: Plan 18 of 18 — fresh attempt-1 CI and Browser UAT passed their required owner jobs; preparing acceptance closeout
-stopped_at: CI 41740924592 and Browser UAT 41740924604 completed on aa8dc463; both owner jobs passed, two known/pre-existing reds are triaged, acceptance generation and phase verification remain
-last_updated: "2026-11-04T00:08:43Z"
+status: Plan 18 of 18 — advisory review found a task-evidence false pass; fix is implemented and local acceptance tests pass, fresh owner runs remain
+stopped_at: Tightened task-specific command evidence after CR-01; pending source commit, push and fresh attempt-1 CI/Browser observations
+last_updated: "2026-11-04T00:34:00Z"
 last_activity: 2026-11-03
-last_activity_desc: Fresh attempt-1 CI and Browser UAT completed on aa8dc463; both required owner jobs passed and the two unrelated reds were triaged
+last_activity_desc: Fixed the per-task acceptance evidence false pass; 29 acceptance tests and all 51 task-evidence records validate locally
 state_head: aa8dc46378555f56410a8f27a2e7cffe93266c62
 progress:
   total_phases: 3
@@ -34,8 +34,8 @@ See: .planning/PROJECT.md (updated 2026-10-27)
 
 Phase: 254 (Recurring Quality, Reviewed Fixes and Curation) — EXECUTING
 Plan: 18 of 18
-Status: Plan 18 of 18 — required owner jobs passed on fresh attempt-1 CI and Browser UAT; acceptance and phase verification are in progress
-Last activity: 2026-11-03 — final measurements and triage recorded on aa8dc463
+Status: Plan 18 of 18 — per-task evidence blocker fixed locally; fresh attempt-1 CI and Browser UAT are required on the new source commit
+Last activity: 2026-11-03 — advisory review found and closed the per-task evidence false pass; final measurements need refresh
 
 Progress: [███████░░░] 67%
 Current milestone planning blockers: None. Phase 253 passed independent verification (56/56, behavior_unverified: 0), the fresh 10-lane aggregate (151 browser cells/152 tests), retained Phase252 gate (21/21), and executable UAT (24/24). CR-01/CR-02 and the guide-regeneration integration defect are fixed. Six current/historical unclassified assumptions, two nonblocking Phase253 summary reference-parser notices, source-only UI recommendations, and the explicit unavailable monetary-source limit remain recorded for Phase254.
@@ -711,8 +711,8 @@ Active v1.59 clears the reopen rule through a concrete adopter requirement and e
 
 ## Session Continuity
 
-Last session: 2026-11-04T00:08:43Z
-Stopped at: Attempt-1 CI 41740924592 and Browser UAT 41740924604 passed their required owner jobs on aa8dc46378555f56410a8f27a2e7cffe93266c62; finalize 254-18 summary/UAT, then run phase close verification
+Last session: 2026-11-04T00:34:00Z
+Stopped at: Fixed CR-01 in the acceptance generator and validation map; 29 tests pass and the 51 task records validate locally. Push the source fix and collect fresh attempt-1 CI/Browser owner runs before closing Plan 18.
 Resume file: .planning/phases/254-recurring-quality-reviewed-fixes-and-curation/.continue-here.md
 
 229-20 outcome (commits 024eaeca, ddd9a137, c6677152):
